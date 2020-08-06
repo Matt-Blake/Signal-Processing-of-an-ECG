@@ -49,6 +49,12 @@ def plotECG(samples, sample_rate):
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
 
 
+def calcFreqSpectrum(samples, sample_rate):
+    freq_data = np.abs(fft(samples))
+    freq = np.linspace(0, sample_rate/2, len(freq_data))
+    return freq, freq_data
+
+
 def plotECGSpectrum(freq, freq_data):
     """Plot the frequency spectrum of ECG data"""
 
@@ -61,12 +67,6 @@ def plotECGSpectrum(freq, freq_data):
     plt.xlim(freq[0], freq[-1] / 2) # Limit the x axis to locations with data points
 
 
-def calcFreqSpectrum(samples, sample_rate):
-    freq_data = np.abs(fft(samples))
-    freq = np.linspace(0, sample_rate/2, len(freq_data))
-    return freq, freq_data
-
-
 def computeNotchCoefficients(notch_freq, notch_width, sampling_freq):
     """Compute and return the optimal notch filter coefficients, based on the notch frequency, the 3 dB width of the
     notch and the sampling frequency"""
@@ -77,39 +77,48 @@ def computeNotchCoefficients(notch_freq, notch_width, sampling_freq):
 
     # Calculate the locations of the pole conjugate pair
     poles_magnitude = 1 - np.pi * (notch_width/sampling_freq)  # Calculate the optimal magnitude for the pole pairs
-    poles_phase = notch_freq / sampling_freq * DEGREES_CIRCLE * 1.08  # Calculate the optimal phase for the pole pairs
+    poles_phase = notch_freq / sampling_freq * DEGREES_CIRCLE  # Calculate the optimal phase for the pole pairs
 
     # Calculate feedfoward tap coefficients
     a0 = 1 * 1 # Calculate the zero delay term zero coefficent
     a1 = 1 * zeros_magnitude * np.exp(complex(1j * zeros_phase) + 1 * zeros_magnitude * np.exp(-1j * zeros_phase)) # Calculate the one delay term zero coefficent
     a2 = zeros_magnitude * np.exp(1j * zeros_phase) * zeros_magnitude * np.exp(-1j * zeros_phase) # Calculate the two delay term zero coefficent
-    #a = [a0, a1, a2] # Store feedfoward coefficents in an array
-    a = [1, -1.91003, 1]
+    #numerator = [a0, a1, a2] # Store feedfoward coefficents in an array
+    numerator = np.array([1, -1.91003, 1])
 
     # Calculate feedback tap coefficients
     b0 = 1 * 1  # Calculate the zero delay term zero coefficent
     b1 = 1 * poles_magnitude * np.exp(1j * poles_phase) + 1 * poles_magnitude * np.exp(-1j * poles_phase)  # Calculate the one delay term zero coefficent
     b2 = poles_magnitude * np.exp(1j * poles_phase) * poles_magnitude * np.exp(-1j * poles_phase)  # Calculate the two delay term zero coefficent
-    #b = [b0, b1, b2]  # Store feedback coefficents in an array
-    b = [1, -1.7922001, 0.969555]
+    #denominator = [b0, b1, b2]  # Store feedback coefficents in an array
+    denominator = np.array([1, -1.7922001, 0.969555])
 
-    # Calculate IIR tap coefficents
-    filter_frequencies, filter_response = freqz(a, b, fs=sampling_freq)
-
-    return filter_frequencies, filter_response
+    return numerator, denominator
 
 
-def createNotchFilter(notch_freq_1, notch_freq_2, notch_width, sample_rate):
-    """Create and return a notch filter, which filters out two frequency bands"""
+def applyNotchFilters(notch_freq_1, notch_freq_2, notch_width, sample_rate, data):
+    """Create notch filters, which are then applied to a data. This filtered data is returned"""
 
-    filter_frequencies_1, filter_response_1 = computeNotchCoefficients(notch_freq_1, notch_width, sample_rate)  # Calculate notch filter coefficents for the first notch frequency
-    filter_frequencies_2, filter_response_2 = computeNotchCoefficients(notch_freq_2, notch_width, sample_rate)  # Calculate notch filter coefficents for the second notch frequency
-    filter_response = convolve(filter_response_1, filter_response_2)  # Combine the two notch filters to create one overall filter
-    print(len(filter_frequencies_1))
-    print(len(filter_response_1))
-    print(len(filter_response))
+    # Create notch filters
+    #filter_frequencies_1, filter_response_1 = computeNotchCoefficients(notch_freq_1, notch_width, sample_rate)  # Calculate notch filter coefficents for the first notch frequency
+    #filter_frequencies_2, filter_response_2 = computeNotchCoefficients(notch_freq_2, notch_width, sample_rate)  # Calculate notch filter coefficents for the second notch frequency
+    numerator_1, denominator_1 = computeNotchCoefficients(notch_freq_1, notch_width, sample_rate)  # Calculate notch filter coefficents for the first notch frequency
+    numerator_2, denominator_2 = computeNotchCoefficients(notch_freq_2, notch_width, sample_rate)  # Calculate notch filter coefficents for the second notch frequency
 
-    return filter_frequencies_1, filter_response_1
+    # Calculate frequency response of filters
+    filter_frequencies_1, filter_response_1 = freqz(numerator_1, denominator_1, fs=sample_rate)
+    filter_frequencies_2, filter_response_2 = freqz(numerator_2, denominator_2, fs=sample_rate)
+
+    # Graph frequency response of filters
+    #plotFilterSpectrum(filter_frequencies_1, filter_response_) # Plot the frequency response of the first notch filter
+    #plotFilterSpectrum(filter_frequencies_2, filter_response_2)  # Plot the frequency response of the second notch filter
+
+    # Apply filters to data
+    partially_filtered_data = lfilter(numerator_1, denominator_1, data)
+    filtered_data = lfilter(numerator_2, denominator_2, partially_filtered_data)
+    plotECG(filtered_data, sample_rate)
+
+    return filtered_data
 
 
 def plotFilterSpectrum(freq, freq_data):
@@ -140,10 +149,12 @@ def main():
 
     plotECG(samples, sample_rate) # Plot a time domain graph of the ECG data
     plotECGSpectrum(frequency, frequency_data) # Plot the frequency spectrum of the ECG data
-    filter_frequencies, filter_response = createNotchFilter(notch_freq_1, notch_freq_2, notch_width, sample_rate) # Calculate notch filter coefficents
-    plotFilterSpectrum(filter_frequencies, filter_response) # Plot the frequency response of the notch filter
+
+    filtered_data = applyNotchFilters(notch_freq_1, notch_freq_2, notch_width, sample_rate, samples) # Calculate notch filter coefficents
+    #plotFilterSpectrum(filter_frequencies, filter_response) # Plot the frequency response of the notch filter
 
     plt.show()  # Display figures
 
 
-main()
+if __name__ == "__main__":
+    main()
