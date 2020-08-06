@@ -1,5 +1,8 @@
 from scipy.signal import freqz, lfilter, firwin, remez, convolve
+from scipy.fft import fft
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 def importData(filename):
     """Import data from a text file"""
@@ -28,12 +31,11 @@ def getTimeData(sample_rate, num_samples):
     return time
 
 
-
 def plotECG(samples, sample_rate):
     """Plot a time domain graph of the ECG data"""
 
     # Get timing data
-    num_samples = len(samples) # Calculate the number of ECG samples
+    num_samples = len(samples) # Calculate the number of ECG sample
     time = getTimeData(sample_rate, num_samples) # Create an array containing the time each sample was taken
 
     # Plot ECG
@@ -44,8 +46,24 @@ def plotECG(samples, sample_rate):
     plt.suptitle("Time domain ECG signal")
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
 
-def plotECGSpectrum(samples):
+def plotECGSpectrum(freq, freq_data):
+    
+    # Plot ECG
+    plt.figure(2)
+    plt.plot(freq, freq_data)
+    plt.xlabel("Frequency (Hz)")
+    plt.ylabel("Amplitude (dB)")
+    plt.suptitle("Frequency Spectrum of the ECG signal")
+    plt.xlim(freq[0], freq[-1] / 2) # Limit the x axis to locations with data points
+
+def calcFreqSpectrum(samples, sample_rate):
+    freq_data = np.abs(fft(samples))
+    freq = np.linspace(0, sample_rate/2, len(freq_data))
+    return freq, freq_data
+
+def displayPeakFrequencies(freq, freq_data):
     return 0
+
 
 def main():
     """Main function of ENEL420 Assignment 1"""
@@ -54,13 +72,13 @@ def main():
     sample_rate = 1024  # Sample rate of data (Hz)
 
     samples = importData(filename) # Import data from file
+    frequency, frequency_data = calcFreqSpectrum(samples, sample_rate)
+    displayPeakFrequencies(frequency, frequency_data)
+
     plotECG(samples, sample_rate) # Plot a time domain graph of the ECG data
+    plotECGSpectrum(frequency, frequency_data)
 
     plt.show()  # Display
-
-
-    plt.show()
-
 
 
 main()
