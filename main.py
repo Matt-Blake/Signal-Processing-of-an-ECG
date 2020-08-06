@@ -1,4 +1,5 @@
 from scipy.signal import freqz, lfilter, firwin, remez, convolve
+import matplotlib.pyplot as plt
 
 def importData(filename):
     """Import data from a text file"""
@@ -23,6 +24,8 @@ def main():
     filename = 'enel420_grp_18.txt' # Location in project where data is stored
 
     samples = importData(filename) # Import data from file
+    plt.plot(samples)
+    plt.show()
 
 
 main()
