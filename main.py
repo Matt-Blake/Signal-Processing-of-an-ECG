@@ -20,6 +20,7 @@ def importData(filename):
 
     return data
 
+
 def getTimeData(sample_rate, num_samples):
     """Create and return an array containing the time each sample is taken. This assumes equal sampling periods"""
 
@@ -46,6 +47,7 @@ def plotECG(samples, sample_rate):
     plt.suptitle("Time domain ECG signal")
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
 
+
 def plotECGSpectrum(freq, freq_data):
     
     # Plot ECG
@@ -56,10 +58,24 @@ def plotECGSpectrum(freq, freq_data):
     plt.suptitle("Frequency Spectrum of the ECG signal")
     plt.xlim(freq[0], freq[-1] / 2) # Limit the x axis to locations with data points
 
+
 def calcFreqSpectrum(samples, sample_rate):
     freq_data = np.abs(fft(samples))
     freq = np.linspace(0, sample_rate/2, len(freq_data))
     return freq, freq_data
+
+
+def computeNotchFilter(notch_freq, notch_width, sampling_freq):
+    """Compute and return the optimal notch filter coefficents, based on the notch frequency, the 3 dB width of the
+    notch and the sampling frequency"""
+
+    # Calculate the locations of the zero conjugate pair
+    zeros_magnitude = 1 # Place the zeros on the unit circle for maximum attenuation
+    zeros_phase = notch_freq/sampling_freq * DEGREES_CIRCLE # Calculate the optimal phase for the zero pairs\
+
+    # Calculate the locations of the pole conjugate pair
+    zeros_magnitude = 1 - np.pi * (notch_width/sampling_freq)  # Calculate the optimal magnitude for the pole pairs
+    zeros_phase = notch_freq / sampling_freq * DEGREES_CIRCLE  # Calculate the optimal phase for the pole pairs
 
 
 def main():
@@ -74,7 +90,7 @@ def main():
     plotECG(samples, sample_rate) # Plot a time domain graph of the ECG data
     plotECGSpectrum(frequency, frequency_data)
 
-    plt.show()  # Display
+    plt.show()  # Display figures
 
 
 main()
