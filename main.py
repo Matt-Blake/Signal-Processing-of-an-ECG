@@ -17,19 +17,19 @@ def importData(filename):
 
     return data
 
-
 def getTimeData(sample_rate, num_samples):
     """Create and return an array containing the time each sample is taken. This assumes equal sampling periods"""
 
     time = [] # Create an array for the results to be stored in
-    for i in range(len(samples)): # Iterate through each sample
+    for i in range(num_samples): # Iterate through each sample
         sample_time = i/sample_rate # Calculate the time this sample is taken
         time.append(sample_time) # Add time to results array
 
     return time
 
 
-def plotECG():
+
+def plotECG(samples, sample_rate):
     """Plot a time domain graph of the ECG data"""
 
     # Get timing data
@@ -44,6 +44,8 @@ def plotECG():
     plt.suptitle("Time domain ECG signal")
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
 
+def plotECGSpectrum(samples):
+    return 0
 
 def main():
     """Main function of ENEL420 Assignment 1"""
@@ -55,6 +57,10 @@ def main():
     plotECG(samples, sample_rate) # Plot a time domain graph of the ECG data
 
     plt.show()  # Display
+
+
+    plt.show()
+
 
 
 main()
