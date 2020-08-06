@@ -22,9 +22,12 @@ def main():
     """Main function of ENEL420 Assignment 1"""
 
     filename = 'enel420_grp_18.txt' # Location in project where data is stored
-
+    
     samples = importData(filename) # Import data from file
     plt.plot(samples)
+    plt.xlabel("Time (s)")
+    plt.ylabel("Amplitude (uV)")
+    plt.suptitle("Time domain ECG signal")
     plt.show()
 
 
