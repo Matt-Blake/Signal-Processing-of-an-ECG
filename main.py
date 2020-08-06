@@ -18,24 +18,43 @@ def importData(filename):
     return data
 
 
-def main():
-    """Main function of ENEL420 Assignment 1"""
+def getTimeData(sample_rate, num_samples):
+    """Create and return an array containing the time each sample is taken. This assumes equal sampling periods"""
 
-    filename = 'enel420_grp_18.txt' # Location in project where data is stored
-    sample_rate = 1024  # Sample rate of data (Hz)
+    time = [] # Create an array for the results to be stored in
+    for i in range(len(samples)): # Iterate through each sample
+        sample_time = i/sample_rate # Calculate the time this sample is taken
+        time.append(sample_time) # Add time to results array
 
-    samples = importData(filename) # Import data from file
+    return time
 
-    # Create array with time each sample was taken
-    time = []
-    for i in range(len(samples)):
-        time.append(i/sample_rate)
 
+def plotECG():
+    """Plot a time domain graph of the ECG data"""
+
+    # Get timing data
+    num_samples = len(samples) # Calculate the number of ECG samples
+    time = getTimeData(sample_rate, num_samples) # Create an array containing the time each sample was taken
+
+    # Plot ECG
+    plt.figure(1)
     plt.plot(time, samples)
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude (uV)")
     plt.suptitle("Time domain ECG signal")
-    plt.show()
+    plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
+
+
+def main():
+    """Main function of ENEL420 Assignment 1"""
+
+    filename = 'enel420_grp_18.txt' # Location in project where ECG data is stored
+    sample_rate = 1024  # Sample rate of data (Hz)
+
+    samples = importData(filename) # Import data from file
+    plotECG(samples, sample_rate) # Plot a time domain graph of the ECG data
+
+    plt.show()  # Display
 
 
 main()
