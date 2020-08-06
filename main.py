@@ -61,19 +61,15 @@ def calcFreqSpectrum(samples, sample_rate):
     freq = np.linspace(0, sample_rate/2, len(freq_data))
     return freq, freq_data
 
-def displayPeakFrequencies(freq, freq_data):
-    return 0
-
 
 def main():
     """Main function of ENEL420 Assignment 1"""
-
+    plt.close('all')
     filename = 'enel420_grp_18.txt' # Location in project where ECG data is stored
     sample_rate = 1024  # Sample rate of data (Hz)
 
     samples = importData(filename) # Import data from file
     frequency, frequency_data = calcFreqSpectrum(samples, sample_rate)
-    displayPeakFrequencies(frequency, frequency_data)
 
     plotECG(samples, sample_rate) # Plot a time domain graph of the ECG data
     plotECGSpectrum(frequency, frequency_data)
