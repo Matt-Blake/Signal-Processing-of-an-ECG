@@ -22,9 +22,16 @@ def main():
     """Main function of ENEL420 Assignment 1"""
 
     filename = 'enel420_grp_18.txt' # Location in project where data is stored
-    
+    sample_rate = 1024  # Sample rate of data (Hz)
+
     samples = importData(filename) # Import data from file
-    plt.plot(samples)
+
+    # Create array with time each sample was taken
+    time = []
+    for i in range(len(samples)):
+        time.append(i/sample_rate)
+
+    plt.plot(time, samples)
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude (uV)")
     plt.suptitle("Time domain ECG signal")
