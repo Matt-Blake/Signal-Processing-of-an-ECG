@@ -265,16 +265,6 @@ def main():
     win_time = getTimeData(sample_rate, len(windowed_samples)) # Create a time array based on window filtered data
     win_frequency, win_freq_data = calcFreqSpectrum(windowed_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
 
-    # Calculate the variance of data
-    notched_noise_variance = calculateNoiseVariance(samples, notched_samples)  # Calculate the variance of the noise removed by the IIR notch filters
-    first_notched_noise_variance = calculateNoiseVariance(samples, half_notched_samples) # Calculate the variance of the noise removed by the first IIR notch filter
-    second_notched_noise_variance = calculateNoiseVariance(half_notched_samples, notched_samples) # Calculate the variance of the noise removed by the second IIR notch filter
-
-    # Save noise power to a .txt file
-    noise_power_data = {'IIR notch filters':notched_noise_variance, 'first IIR notch filter':first_notched_noise_variance,
-                       'second IIR notch filter':second_notched_noise_variance} # Create a dictionary of the filter name and its noise power
-    saveNoisePowerData(noise_power_data, noise_power_output_filename) # Save the data about each filter to a file
-
     # Plot unfiltered data
     ECG = plotECG(samples, base_time) # Plot a time domain graph of the ECG data
     ECGSpectrum = plotECGSpectrum(base_freq, base_freq_data) # Plot the frequency spectrum of the ECG data
@@ -293,6 +283,17 @@ def main():
     figures = [ECG, ECGSpectrum, IIRNotchECG, IIRNotchECGSpectrum, IIRNotchFilterResponse, WindowedECG, WindowedECGSpectrum,
                WindowFilterResponse] # The figures to save, which must be in the same order as figure_names
     saveFigures(figures, figures_filename, figure_names) # Save the figures to an output folder in the current directory
+
+    # Calculate the variance of data
+    notched_noise_variance = calculateNoiseVariance(samples, notched_samples)  # Calculate the variance of the noise removed by the IIR notch filters
+    first_notched_noise_variance = calculateNoiseVariance(samples, half_notched_samples)  # Calculate the variance of the noise removed by the first IIR notch filter
+    second_notched_noise_variance = calculateNoiseVariance(half_notched_samples, notched_samples)  # Calculate the variance of the noise removed by the second IIR notch filter
+
+    # Save noise power to a .txt file
+    noise_power_data = {'IIR notch filters': notched_noise_variance,
+                        'first IIR notch filter': first_notched_noise_variance,
+                        'second IIR notch filter': second_notched_noise_variance}  # Create a dictionary of the filter name and its noise power
+    saveNoisePowerData(noise_power_data, noise_power_output_filename)  # Save the data about each filter to a file
 
 
 
