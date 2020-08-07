@@ -235,7 +235,7 @@ def main():
 
     # Define filenames
     filename = 'enel420_grp_18.txt' # Location in project where ECG data is stored
-    figures_filename = 'Figures' # Folder to save created figure images to
+    figures_filename = 'Group 18: Figures' # Folder to save created figure images to
     noise_power_output_filename = 'Group 18: Noise Power (Variance) Data from Created Filters.txt' # File to save calculated noise power data
     figure_names = ['ECG Time Plot.png', 'ECG Freq Plot.png', 'IIR Notched ECG Time Plot.png',
                     'IIR Notched Freq Plot.png',
