@@ -5,10 +5,12 @@
     creates IIR and FIR notch filters to reduce
     narrowband noise from the data. Figures of
     the data, filtered data and filter responses
-    are produced.
+    are produced. The noise power is calculated.
+    All results are saved in the current directory.
 
-    Authors: Matt Blake   (58979250),
-             Reweti Davis (23200856).
+    Authors: Matt Blake   (58979250)
+             Reweti Davis (23200856)
+    Group Number: 18
     Last Modified: 07/08/2020
 """
 
@@ -18,6 +20,7 @@ from scipy.fft import fft
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import shutil
 from signalPlots import *
 
 
@@ -92,17 +95,63 @@ def computeIIRNotchCoefficients(notch_freq, notch_width, sampling_freq):
 
 
 def createIIRNotchFilters(notch_freq_1, notch_freq_2, notch_width, sample_rate):
-    """Create notch filters, then combine them. The coefficients of the combined filter are returned"""
+    """Create notch filters, then combine them. The coefficients of the filters are returned"""
 
     # Create notch filters
     numerator_1, denominator_1 = computeIIRNotchCoefficients(notch_freq_1, notch_width, sample_rate)  # Calculate notch filter coefficents for the first notch frequency
     numerator_2, denominator_2 = computeIIRNotchCoefficients(notch_freq_2, notch_width, sample_rate)  # Calculate notch filter coefficents for the second notch frequency
 
-    # Combine filters so the combined frequency response can be plotted
-    numerator = convolve(numerator_1, numerator_2) # Create the overall numerator via convolution
-    denominator = convolve(denominator_1, denominator_2) # Create the overall denominator via convolution
+    return numerator_1, denominator_1, numerator_2, denominator_2
+
+
+
+def applyIIRNotchFilters(numerator_1, denominator_1, numerator_2, denominator_2, data):
+    """Pass data through two cascaded notch filters and return the result after each filter"""
+
+    partially_filtered_data = lfilter(numerator_1, denominator_1, data) # Apply first filter to data
+    filtered_data = lfilter(numerator_2, denominator_2, partially_filtered_data) # Apply second notch filter to data
+
+    return partially_filtered_data, filtered_data
+
+
+
+def combineFilters(numerator_1, denominator_1, numerator_2, denominator_2):
+    """Tales the numerators and denominators of two filters and convolutes them to create an overall filter.
+    The numerator and denominator of this filter are returned"""
+
+    numerator = convolve(numerator_1, numerator_2)  # Create the overall numerator via convolution
+    denominator = convolve(denominator_1, denominator_2)  # Create the overall denominator via convolution
 
     return numerator, denominator
+
+
+
+def calculateVariance(data):
+    """Calculates and returns the variance of a signal"""
+
+    # Calculate the variance of the signal X using: variance = E[X^2] - E[X]^2
+    expected_data_power = sum((np.square(data)))/len(data)  # Calculate E[X^2]
+    power_of_expected_data = np.square(sum(data)/len(data))  # Calculate E[X]^2
+    variance_data = expected_data_power - power_of_expected_data  # Calculate the variance of the data
+
+    return variance_data
+
+
+
+def calculateNoiseVariance(data, filtered_data):
+    """"Calculate the variance of the noise by comparing the filtered and unfiltered data. The variance of the noise
+    is approximated as the variance of the signal removed by the filter"""
+
+    # Turn data arrays into numpy arrays so that mathematical operations can be performed
+    np_data = np.array(data)
+    np_filtered_data = np.array(filtered_data)
+
+    # Calculate the variance of the removed noise by finding the variances of the filtered and unfiltered data
+    data_variance = calculateVariance(np_data) # Calculate the variance of the unfiltered data
+    filtered_data_variance = calculateVariance(np_filtered_data) # Calculat the variance of the filtered data
+    noise_data_variance = data_variance - filtered_data_variance # Calculate the variance of the removed noise
+
+    return noise_data_variance
 
 
 
@@ -127,19 +176,56 @@ def createWindowFilter(notches, sample_rate, notch_width):
 
 
 
+def createClean(filename, directory=False):
+    """Create a file/folder at the target location and returns the path to this if it is a folder or a the file ready
+    for reading and writing if it is a file.
+    Deletes a previously created file if it exists, so that a new file can be written cleanly"""
+
+    # Remove file
+    if os.path.exists(filename): # Check if an output path already exists
+        if directory == True: # If a folder is to be created
+            shutil.rmtree(filename) # Remove previous output folder, so the figures can be cleanly saved
+        else: # If a file is to be created
+            os.remove(filename) # Remove the previous file, so the file can be cleanly saved
+
+    # Create
+    if directory == True: # If a folder is to be created
+        output = os.path.join(filename)  # The output folder for the figures to be saved
+        os.mkdir(output) # Create output folder
+    else: # If a file is to be created
+        output = open(filename, "w+") # Create an open the file for reading and writing
+
+    return output
+
+
+
 def saveFigures(figures, figure_names):
     """Save a list of figures as the corresponding name"""
 
-    output_path = os.path.join("Figures") # The output folder for the figures to be saved
-
-    # If the output folder does not exist, create it
-    if os.path.exists(output_path) == False:
-        os.mkdir(output_path) # Create output folder
+    figures_location = "Figures" # The folder name used to store the figures
+    output_path = createClean(figures_location, True) # Create a clear output path for figures to be stored in
 
     # Iterate through each figure saving it as the corresponding name
     for i in range(len(figures)):
         plt.figure(figures[i].number) # Set the figure as the current figure
         plt.savefig(output_path + '/' + figure_names[i]) # Save the current figure
+
+
+
+def saveNoisePowerData(noise_power_data):
+    """Iterate through a list of filters, saving the noise power (variance) data"""
+
+    # Create text to write and file to write to
+    output_filename = "Group 18: Noise Power (Variance) Data from Created Filters.txt" # The filename to save data
+    microwatt_symbol = '\u03BC' + 'W'  # Microvolt symbol using unicode
+    variance_text_1 = "The mean power removed by the "  # The first section of the text string to print
+    variance_text_2 = " is {:.1f} " + microwatt_symbol + "\n" # The section section of the text string to print
+    outputfile = createClean(output_filename)  # Create output file
+
+    # Write data to file
+    for filter_name, filter_noise_power in noise_power_data.items(): # Iterate through filters
+        output_string = variance_text_1 + filter_name + variance_text_2.format(filter_noise_power) # The text to save
+        outputfile.write(output_string) # Save the noise power (variance) data for that filter
 
 
 
@@ -149,10 +235,10 @@ def main():
     # Close any open graphs
     plt.close('all')
 
-    # Define parameters
+    # Define program parameters
     filename = 'enel420_grp_18.txt' # Location in project where ECG data is stored
     sample_rate = 1024  # Sample rate of data (Hz)
-    cutoff = [57.755, 88.824] # Frequencies to attenuate
+    cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
     figure_names = ['ECG Time Plot.png', 'ECG Freq Plot.png', 'IIR Notched ECG Time Plot.png', 'IIR Notched Freq Plot.png',
                     'IIR Frequency Response.png', 'Windowed ECG Time Plot.png', 'Windowed Freq Plot.png',
@@ -163,17 +249,29 @@ def main():
     base_time = getTimeData(sample_rate, len(samples)) # Create a time array based on imported data
     base_freq, base_freq_data = calcFreqSpectrum(samples, sample_rate) # Calculate the frequency spectrum of the data
 
-    # Create IIR Notch filter and apply it to data
-    notched_numerator, notched_denominator = createIIRNotchFilters(cutoff[0], cutoff[1], notch_width, sample_rate) # Calculate notch filter coefficents
-    notched_samples = lfilter(notched_numerator, notched_denominator, samples) # Apply notch filter to data
+    # Create IIR Notch filters and use them to filter the ECG data
+    notch_num_1, notch_denom_1, notch_num_2, notch_denom_2 = createIIRNotchFilters(cutoff[0], cutoff[1], notch_width, sample_rate) # Calculate notch filter coefficents
+    half_notched_samples, notched_samples = applyIIRNotchFilters(notch_num_1, notch_denom_1, notch_num_2, notch_denom_2, samples) # Apply cascaded notch filters to data
     notch_time = getTimeData(sample_rate, len(notched_samples)) # Create a time array based on notch filtered data
     notch_frequency, notch_freq_data = calcFreqSpectrum(notched_samples, sample_rate) # Calculate frequency of the IIR filtered ECG data
+    notched_numerator, notched_denominator = combineFilters(notch_num_1, notch_denom_1, notch_num_2, notch_denom_2)  # Combine the two IIR notch filters
 
     # Create and apply FIR filters to data
     window_filter = createWindowFilter(cutoff, sample_rate, notch_width) # Calculate window filter coefficents
     windowed_samples = convolve(samples, window_filter) # Apply window filter to data
     win_time = getTimeData(sample_rate, len(windowed_samples)) # Create a time array based on window filtered data
     win_frequency, win_freq_data = calcFreqSpectrum(windowed_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
+
+    # Calculate the variance of data
+    notched_noise_variance = calculateNoiseVariance(samples, notched_samples)  # Calculate the variance of the noise removed by the IIR notch filters
+    first_notched_noise_variance = calculateNoiseVariance(samples, half_notched_samples) # Calculate the variance of the noise removed by the first IIR notch filter
+    second_notched_noise_variance = calculateNoiseVariance(half_notched_samples, notched_samples) # Calculate the variance of the noise removed by the second IIR notch filter
+
+    # Print variance (power) data to the terminal
+
+    noise_power_data = {"IIR notch filters":notched_noise_variance, "first IIR notch filter":first_notched_noise_variance,
+                       "second IIR notch filter":second_notched_noise_variance} # Create a dictionary of the filter name and its noise power
+    saveNoisePowerData(noise_power_data)
 
     # Plot unfiltered data
     ECG = plotECG(samples, base_time) # Plot a time domain graph of the ECG data
