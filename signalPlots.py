@@ -17,7 +17,7 @@ import numpy as np
 #
 # Unfiltered Plots
 #
-def plotECG(samples, sample_rate, time):
+def plotECG(samples, time):
     """Plot a time domain graph of the ECG data"""
 
     # Plot ECG
@@ -46,7 +46,7 @@ def plotECGSpectrum(frequency, frequency_data):
 #
 # IIR Notch Plots
 #
-def plotNotchedECG(samples, sample_rate, time):
+def plotNotchedECG(samples, time):
     """Plot a time domain graph of the ECG data"""
 
     # Plot ECG
@@ -72,24 +72,10 @@ def plotIIRNotchFilterResponse(numuerator, denominator):
     plt.xlim(w_scaled[0], w_scaled[-1]) # Limit the x axis from 0 to nyquist frequency
 
 
-
-def plotFilterSpectrum(freq, freq_data):
-    """Plot the frequency spectrum of a filter response"""
-
-    # Plot spectrum
-    plt.figure(3)
-    plt.plot(freq, freq_data)
-    plt.xlabel("Frequency (Hz)")
-    plt.ylabel("Amplitude (dB)")
-    plt.suptitle("Frequency Response of the Notch Filter")
-    #plt.xlim(freq[0], freq[-1] / 2) # Limit the x axis to locations with data points
-
-
-
 #
 # Window Filtered Plots
 #
-def plotWindowedECG(samples, sample_rate, time):
+def plotWindowedECG(samples, time):
     """Plot the ECG which has filtered by a window filter."""
 
     # Plot Windowed ECG
