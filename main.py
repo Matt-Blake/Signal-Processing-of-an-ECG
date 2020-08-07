@@ -199,10 +199,9 @@ def createClean(filename, directory=False):
 
 
 
-def saveFigures(figures, figure_names):
+def saveFigures(figures, figures_location, figure_names):
     """Save a list of figures as the corresponding name"""
 
-    figures_location = "Figures" # The folder name used to store the figures
     output_path = createClean(figures_location, True) # Create a clear output path for figures to be stored in
 
     # Iterate through each figure saving it as the corresponding name
@@ -212,15 +211,14 @@ def saveFigures(figures, figure_names):
 
 
 
-def saveNoisePowerData(noise_power_data):
+def saveNoisePowerData(noise_power_data, noise_power_output_filename):
     """Iterate through a list of filters, saving the noise power (variance) data"""
 
     # Create text to write and file to write to
-    output_filename = "Group 18: Noise Power (Variance) Data from Created Filters.txt" # The filename to save data
     microwatt_symbol = '\u03BC' + 'W'  # Microvolt symbol using unicode
-    variance_text_1 = "The mean power removed by the "  # The first section of the text string to print
-    variance_text_2 = " is {:.1f} " + microwatt_symbol + "\n" # The section section of the text string to print
-    outputfile = createClean(output_filename)  # Create output file
+    variance_text_1 = 'The mean power removed by the '  # The first section of the text string to print
+    variance_text_2 = ' is {:.1f} ' + microwatt_symbol + '\n' # The section section of the text string to print
+    outputfile = createClean(noise_power_output_filename)  # Create output file
 
     # Write data to file
     for filter_name, filter_noise_power in noise_power_data.items(): # Iterate through filters
@@ -235,14 +233,19 @@ def main():
     # Close any open graphs
     plt.close('all')
 
-    # Define program parameters
+    # Define filenames
     filename = 'enel420_grp_18.txt' # Location in project where ECG data is stored
+    figures_filename = 'Figures' # Folder to save created figure images to
+    noise_power_output_filename = 'Group 18: Noise Power (Variance) Data from Created Filters.txt' # File to save calculated noise power data
+    figure_names = ['ECG Time Plot.png', 'ECG Freq Plot.png', 'IIR Notched ECG Time Plot.png',
+                    'IIR Notched Freq Plot.png',
+                    'IIR Frequency Response.png', 'Windowed ECG Time Plot.png', 'Windowed Freq Plot.png',
+                    'Windowed Frequency Response.png']  # The names that each figure should be saved as
+
+    # Define filter and data parameters
     sample_rate = 1024  # Sample rate of data (Hz)
     cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
-    figure_names = ['ECG Time Plot.png', 'ECG Freq Plot.png', 'IIR Notched ECG Time Plot.png', 'IIR Notched Freq Plot.png',
-                    'IIR Frequency Response.png', 'Windowed ECG Time Plot.png', 'Windowed Freq Plot.png',
-                    'Windowed Frequency Response.png'] # The names that each figure should be saved as
 
     # Gather data from input files
     samples = importData(filename) # Import data from file
@@ -267,11 +270,10 @@ def main():
     first_notched_noise_variance = calculateNoiseVariance(samples, half_notched_samples) # Calculate the variance of the noise removed by the first IIR notch filter
     second_notched_noise_variance = calculateNoiseVariance(half_notched_samples, notched_samples) # Calculate the variance of the noise removed by the second IIR notch filter
 
-    # Print variance (power) data to the terminal
-
-    noise_power_data = {"IIR notch filters":notched_noise_variance, "first IIR notch filter":first_notched_noise_variance,
-                       "second IIR notch filter":second_notched_noise_variance} # Create a dictionary of the filter name and its noise power
-    saveNoisePowerData(noise_power_data)
+    # Save noise power to a .txt file
+    noise_power_data = {'IIR notch filters':notched_noise_variance, 'first IIR notch filter':first_notched_noise_variance,
+                       'second IIR notch filter':second_notched_noise_variance} # Create a dictionary of the filter name and its noise power
+    saveNoisePowerData(noise_power_data, noise_power_output_filename) # Save the data about each filter to a file
 
     # Plot unfiltered data
     ECG = plotECG(samples, base_time) # Plot a time domain graph of the ECG data
@@ -290,12 +292,12 @@ def main():
     # Save figures
     figures = [ECG, ECGSpectrum, IIRNotchECG, IIRNotchECGSpectrum, IIRNotchFilterResponse, WindowedECG, WindowedECGSpectrum,
                WindowFilterResponse] # The figures to save, which must be in the same order as figure_names
-    saveFigures(figures, figure_names) # Save the figures to an output folder in the current directory
+    saveFigures(figures, figures_filename, figure_names) # Save the figures to an output folder in the current directory
 
 
 
 # Run program if called
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
 
 
