@@ -1,10 +1,11 @@
 """
-    Contains all the plotting functions for ENEL420 Assignment 1,
-    including suporting functions.
+    signalPlots.py
+    Contains all the plotting functions for ENEL420-S2 Assignment 1,
+    including supporting functions.
 
-    Authors: Matt Blake (), 
+    Authors: Matt Blake   (58979250),
              Reweti Davis (23200856).
-    Last Modified: 07 / 08 / 2020
+    Last Modified: 07/08/2020
 """
 
 from scipy.signal import freqz, lfilter, firwin, remez, firwin2, convolve
@@ -26,6 +27,7 @@ def plotECG(samples, sample_rate, time):
     plt.ylabel("Amplitude (uV)")
     plt.suptitle("Time domain ECG signal")
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
+
 
 
 def plotECGSpectrum(frequency, frequency_data):

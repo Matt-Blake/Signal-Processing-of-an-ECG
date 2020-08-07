@@ -1,12 +1,26 @@
+"""
+    main.py
+    The main module for ENEL420-S2 Assignment 1.
+    This module imports ECG data from a .txt and
+    creates IIR and FIR notch filters to reduce
+    narrowband noise from the data. Figures of
+    the data, filtered data and filter responses
+    are produced.
+
+    Authors: Matt Blake   (58979250),
+             Reweti Davis (23200856).
+    Last Modified: 07/08/2020
+"""
+
+# Imported libraries
 from scipy.signal import freqz, lfilter, firwin, remez, firwin2, convolve
 from scipy.fft import fft
 import matplotlib.pyplot as plt
 import numpy as np
 from signalPlots import *
 
-DEGREES_CIRCLE = 360
 
-
+# Functions
 def importData(filename):
     """Import data from a text file"""
 
@@ -50,13 +64,15 @@ def computeNotchCoefficients(notch_freq, notch_width, sampling_freq):
     """Compute and return the optimal notch filter coefficients, based on the notch frequency, the 3 dB width of the
     notch and the sampling frequency"""
 
+    degrees_circle = 360 # Define the number of degrees in a circle (for unit circle analysis)
+
     # Calculate the locations of the zero conjugate pair
     zeros_magnitude = 1 # Place the zeros on the unit circle for maximum attenuation
-    zeros_phase = notch_freq/sampling_freq * DEGREES_CIRCLE # Calculate the optimal phase for the zero pairs\
+    zeros_phase = notch_freq/sampling_freq * degrees_circle # Calculate the optimal phase for the zero pairs\
 
     # Calculate the locations of the pole conjugate pair
     poles_magnitude = 1 - np.pi * (notch_width/sampling_freq)  # Calculate the optimal magnitude for the pole pairs
-    poles_phase = notch_freq / sampling_freq * DEGREES_CIRCLE  # Calculate the optimal phase for the pole pairs
+    poles_phase = notch_freq / sampling_freq * degrees_circle  # Calculate the optimal phase for the pole pairs
 
     # Calculate feedfoward tap coefficients
     a0 = 1 * 1 # Calculate the zero delay term zero coefficent
