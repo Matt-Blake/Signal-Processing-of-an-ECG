@@ -91,7 +91,7 @@ def applyNotchFilters(notch_freq_1, notch_freq_2, notch_width, sample_rate, data
     #plotFilterSpectrum(filter_frequencies_1, filter_response_) # Plot the frequency response of the first notch filter
     #plotFilterSpectrum(filter_frequencies_2, filter_response_2)  # Plot the frequency response of the second notch filter
 
-    # Apply filters to data
+    # Cascade filters and apply to data
     partially_filtered_data = lfilter(numerator_1, denominator_1, data)
     filtered_data = lfilter(numerator_2, denominator_2, partially_filtered_data)
 
