@@ -1,5 +1,3 @@
-README.md
-
 ENEL420-20S2 Assignment 1
 Authors: Matt Blake   (58979250)
          Reweti Davis (23200856)
