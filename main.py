@@ -161,12 +161,12 @@ def main():
     # Plot IIR notch filtered data
     plotIIRNotchECG(notched_samples, notch_time) # Plot a time domain graph of the IIR notch filtered ECG data
     plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data) # Plot the frequency spectrum of the IIR notch filtered ECG data
-    plotIIRNotchFilterResponse(notched_numerator, notched_denominator) # Plot the frequency response of the notch filter
+    plotIIRNotchFilterResponse(notched_numerator, notched_denominator, sample_rate) # Plot the frequency response of the notch filter
 
     # Plot window filtered data
     plotWindowedECG(windowed_samples, win_time) # Plot a time domain graph of the window filtered ECG data
     plotWindowedECGSpectrum(win_frequency, win_freq_data) # Plot the frequency spectrum of the window filtered ECG data
-    plotWindowFilterResponse(window_filter) # Plot the frequency response of the window filter
+    plotWindowFilterResponse(window_filter, sample_rate) # Plot the frequency response of the window filter
 
     plt.show() # Display figures
 
