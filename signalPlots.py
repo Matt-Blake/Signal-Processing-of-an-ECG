@@ -55,6 +55,8 @@ def plotNotchedECG(samples, sample_rate, time):
     plt.suptitle("Time domain notch filtered ECG signal")
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
 
+
+
 def plotIIRNotchFilterResponse(numuerator, denominator):
     """Plot the frequency response of the window filter."""
 
@@ -66,6 +68,8 @@ def plotIIRNotchFilterResponse(numuerator, denominator):
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the notch Filtered ECG Signal")
     plt.xlim(w_scaled[0], w_scaled[-1]) # Limit the x axis from 0 to nyquist frequency
+
+
 
 def plotFilterSpectrum(freq, freq_data):
     """Plot the frequency spectrum of a filter response"""
