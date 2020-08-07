@@ -1,9 +1,11 @@
-from scipy.signal import freqz, lfilter, firwin, remez, convolve
+from scipy.signal import freqz, lfilter, firwin, remez, firwin2, convolve
 from scipy.fft import fft
 import matplotlib.pyplot as plt
 import numpy as np
+from signalPlots import *
 
 DEGREES_CIRCLE = 360
+
 
 def importData(filename):
     """Import data from a text file"""
@@ -22,6 +24,7 @@ def importData(filename):
     return data
 
 
+
 def getTimeData(sample_rate, num_samples):
     """Create and return an array containing the time each sample is taken. This assumes equal sampling periods"""
 
@@ -33,38 +36,14 @@ def getTimeData(sample_rate, num_samples):
     return time
 
 
-def plotECG(samples, sample_rate):
-    """Plot a time domain graph of the ECG data"""
-
-    # Get timing data
-    num_samples = len(samples) # Calculate the number of ECG sample
-    time = getTimeData(sample_rate, num_samples) # Create an array containing the time each sample was taken
-
-    # Plot ECG
-    plt.figure(1)
-    plt.plot(time, samples)
-    plt.xlabel("Time (s)")
-    plt.ylabel("Amplitude (uV)")
-    plt.suptitle("Time domain ECG signal")
-    plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
-
 
 def calcFreqSpectrum(samples, sample_rate):
+    """Compute and return the frequency spectrum of the input samples, for the specified sample rate."""
+
     freq_data = np.abs(fft(samples))
-    freq = np.linspace(0, sample_rate/2, len(freq_data))
+    freq = np.linspace(0, sample_rate, len(freq_data))
     return freq, freq_data
 
-
-def plotECGSpectrum(freq, freq_data):
-    """Plot the frequency spectrum of ECG data"""
-
-    # Plot spectrum
-    plt.figure(2)
-    plt.plot(freq, freq_data)
-    plt.xlabel("Frequency (Hz)")
-    plt.ylabel("Amplitude (dB)")
-    plt.suptitle("Frequency Spectrum of the ECG signal")
-    plt.xlim(freq[0], freq[-1] / 2) # Limit the x axis to locations with data points
 
 
 def computeNotchCoefficients(notch_freq, notch_width, sampling_freq):
@@ -96,6 +75,7 @@ def computeNotchCoefficients(notch_freq, notch_width, sampling_freq):
     return numerator, denominator
 
 
+
 def applyNotchFilters(notch_freq_1, notch_freq_2, notch_width, sample_rate, data):
     """Create notch filters, which are then applied to a data. This filtered data is returned"""
 
@@ -104,10 +84,8 @@ def applyNotchFilters(notch_freq_1, notch_freq_2, notch_width, sample_rate, data
     #filter_frequencies_2, filter_response_2 = computeNotchCoefficients(notch_freq_2, notch_width, sample_rate)  # Calculate notch filter coefficents for the second notch frequency
     numerator_1, denominator_1 = computeNotchCoefficients(notch_freq_1, notch_width, sample_rate)  # Calculate notch filter coefficents for the first notch frequency
     numerator_2, denominator_2 = computeNotchCoefficients(notch_freq_2, notch_width, sample_rate)  # Calculate notch filter coefficents for the second notch frequency
-
-    # Calculate frequency response of filters
-    filter_frequencies_1, filter_response_1 = freqz(numerator_1, denominator_1, fs=sample_rate)
-    filter_frequencies_2, filter_response_2 = freqz(numerator_2, denominator_2, fs=sample_rate)
+    
+    plotIIRNotchFilterResponse(numerator_1, denominator_1)
 
     # Graph frequency response of filters
     #plotFilterSpectrum(filter_frequencies_1, filter_response_) # Plot the frequency response of the first notch filter
@@ -116,21 +94,30 @@ def applyNotchFilters(notch_freq_1, notch_freq_2, notch_width, sample_rate, data
     # Apply filters to data
     partially_filtered_data = lfilter(numerator_1, denominator_1, data)
     filtered_data = lfilter(numerator_2, denominator_2, partially_filtered_data)
-    plotECG(filtered_data, sample_rate)
 
     return filtered_data
 
 
-def plotFilterSpectrum(freq, freq_data):
-    """Plot the frequency spectrum of a filter response"""
 
-    # Plot spectrum
-    plt.figure(3)
-    plt.plot(freq, freq_data)
-    plt.xlabel("Frequency (Hz)")
-    plt.ylabel("Amplitude (dB)")
-    plt.suptitle("Frequency Response of the Notch Filter")
-    #plt.xlim(freq[0], freq[-1] / 2) # Limit the x axis to locations with data points
+def windowFilter(notches, sample_rate, notch_width):
+    """Compute and return the bandstop  window filter array for the specified notches."""
+
+    NUM_TAPS = 399 #Max number of taps allowed
+    f1, f2 = notches
+    width = notch_width / 2.0  #One sided 3dB bandwidth, in Hz
+    ny = sample_rate / 2.0
+
+    cutoff = [(f1 - width)/ny, (f1 + width)/ny, (f2 - width)/ny, (f2 + width)/ny]
+    filter_array = firwin(numtaps=NUM_TAPS, cutoff=cutoff, window=('kaiser', 2))
+
+    #Following lines are for interest, hp and lp, to erradicate excess noise in signal...
+    # hp = firwin(numtaps=NUM_TAPS, cutoff=(10/ny), pass_zero=False)
+    # lp = firwin(numtaps=NUM_TAPS, cutoff=(100/ny))
+    # hectic = convolve(hp, filter_array)
+    # hectic = convolve(hectic, lp)
+    
+    return filter_array
+
 
 
 def main():
@@ -139,22 +126,37 @@ def main():
 
     filename = 'enel420_grp_18.txt' # Location in project where ECG data is stored
     sample_rate = 1024  # Sample rate of data (Hz)
+    
+    cutoff = [57.755, 88.324] #Shifted f2 down by 0.5 i think, cos it missed slightly, and fuck me we in the money
 
-    notch_freq_1 = 28.877
-    notch_freq_2 = 44.412
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
 
     samples = importData(filename) # Import data from file
-    frequency, frequency_data = calcFreqSpectrum(samples, sample_rate)
+    base_time = getTimeData(sample_rate, len(samples))
+    base_freq, base_freq_data = calcFreqSpectrum(samples, sample_rate)
 
-    plotECG(samples, sample_rate) # Plot a time domain graph of the ECG data
-    plotECGSpectrum(frequency, frequency_data) # Plot the frequency spectrum of the ECG data
+    notched_samples = applyNotchFilters(cutoff[0], cutoff[1], notch_width, sample_rate, samples) # Calculate notch filter coefficents
+    notch_time = getTimeData(sample_rate, len(notched_samples))
+    
+    window_filter = windowFilter(cutoff, sample_rate, notch_width)
+    windowed_samples = convolve(samples, window_filter)
+    win_time = getTimeData(sample_rate, len(windowed_samples))
+    win_frequency, win_freq_data = calcFreqSpectrum(windowed_samples, sample_rate)
 
-    filtered_data = applyNotchFilters(notch_freq_1, notch_freq_2, notch_width, sample_rate, samples) # Calculate notch filter coefficents
+    plotECG(samples, sample_rate, base_time) # Plot a time domain graph of the ECG data
+    plotECGSpectrum(base_freq, base_freq_data)
+    plotNotchedECG(notched_samples, sample_rate, notch_time)
     #plotFilterSpectrum(filter_frequencies, filter_response) # Plot the frequency response of the notch filter
 
+    
+    plotWindowedECG(windowed_samples, sample_rate, win_time)
+    plotWindowedECGSpectrum(win_frequency, win_freq_data)
+    plotWindowFilterResponse(window_filter)
     plt.show()  # Display figures
 
 
 if __name__ == "__main__":
     main()
+
+
+
