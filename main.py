@@ -17,6 +17,7 @@ from scipy.signal import freqz, lfilter, firwin, remez, firwin2, convolve
 from scipy.fft import fft
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 from signalPlots import *
 
 
@@ -126,16 +127,36 @@ def createWindowFilter(notches, sample_rate, notch_width):
 
 
 
+def saveFigures(figures, figure_names):
+    """Save a list of figures as the corresponding name"""
+
+    output_path = os.path.join("Figures") # The output folder for the figures to be saved
+
+    # If the output folder does not exist, create it
+    if os.path.exists(output_path) == False:
+        os.mkdir(output_path) # Create output folder
+
+    # Iterate through each figure saving it as the corresponding name
+    for i in range(len(figures)):
+        plt.figure(figures[i].number) # Set the figure as the current figure
+        plt.savefig(output_path + '/' + figure_names[i]) # Save the current figure
+
+
+
 def main():
     """Main function of ENEL420 Assignment 1"""
 
-    plt.close('all') # Close any open graphs
+    # Close any open graphs
+    plt.close('all')
 
+    # Define parameters
     filename = 'enel420_grp_18.txt' # Location in project where ECG data is stored
     sample_rate = 1024  # Sample rate of data (Hz)
-    
     cutoff = [57.755, 88.824] # Frequencies to attenuate
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
+    figure_names = ['ECG Time Plot.png', 'ECG Freq Plot.png', 'IIR Notched ECG Time Plot.png', 'IIR Notched Freq Plot.png',
+                    'IIR Frequency Response.png', 'Windowed ECG Time Plot.png', 'Windowed Freq Plot.png',
+                    'Windowed Frequency Response.png'] # The names that each figure should be saved as
 
     # Gather data from input files
     samples = importData(filename) # Import data from file
@@ -155,20 +176,23 @@ def main():
     win_frequency, win_freq_data = calcFreqSpectrum(windowed_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
 
     # Plot unfiltered data
-    plotECG(samples, base_time) # Plot a time domain graph of the ECG data
-    plotECGSpectrum(base_freq, base_freq_data) # Plot the frequency spectrum of the ECG data
+    ECG = plotECG(samples, base_time) # Plot a time domain graph of the ECG data
+    ECGSpectrum = plotECGSpectrum(base_freq, base_freq_data) # Plot the frequency spectrum of the ECG data
 
     # Plot IIR notch filtered data
-    plotIIRNotchECG(notched_samples, notch_time) # Plot a time domain graph of the IIR notch filtered ECG data
-    plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data) # Plot the frequency spectrum of the IIR notch filtered ECG data
-    plotIIRNotchFilterResponse(notched_numerator, notched_denominator, sample_rate) # Plot the frequency response of the notch filter
+    IIRNotchECG = plotIIRNotchECG(notched_samples, notch_time) # Plot a time domain graph of the IIR notch filtered ECG data
+    IIRNotchECGSpectrum = plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data) # Plot the frequency spectrum of the IIR notch filtered ECG data
+    IIRNotchFilterResponse = plotIIRNotchFilterResponse(notched_numerator, notched_denominator, sample_rate) # Plot the frequency response of the notch filter
 
     # Plot window filtered data
-    plotWindowedECG(windowed_samples, win_time) # Plot a time domain graph of the window filtered ECG data
-    plotWindowedECGSpectrum(win_frequency, win_freq_data) # Plot the frequency spectrum of the window filtered ECG data
-    plotWindowFilterResponse(window_filter, sample_rate) # Plot the frequency response of the window filter
+    WindowedECG = plotWindowedECG(windowed_samples, win_time) # Plot a time domain graph of the window filtered ECG data
+    WindowedECGSpectrum = plotWindowedECGSpectrum(win_frequency, win_freq_data) # Plot the frequency spectrum of the window filtered ECG data
+    WindowFilterResponse = plotWindowFilterResponse(window_filter, sample_rate) # Plot the frequency response of the window filter
 
-    plt.show() # Display figures
+    # Save figures
+    figures = [ECG, ECGSpectrum, IIRNotchECG, IIRNotchECGSpectrum, IIRNotchFilterResponse, WindowedECG, WindowedECGSpectrum,
+               WindowFilterResponse] # The figures to save, which must be in the same order as figure_names
+    saveFigures(figures, figure_names) # Save the figures to an output folder in the current directory
 
 
 
