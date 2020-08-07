@@ -1,10 +1,8 @@
 ENEL420-20S2 Assignment 1
 
-Authors: Matt Blake   (58979250)
-
-         Reweti Davis (23200856)
+Authors: Matt Blake (58979250) and Reweti Davis (23200856)
          
- Group Number: 18
+Group Number 18
  
  
 Figures created will be saved in the following folder in the local directory:
