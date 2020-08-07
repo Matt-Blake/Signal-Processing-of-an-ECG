@@ -1,10 +1,11 @@
 """
     signalPlots.py
-    Contains all the plotting functions for ENEL420-S2 Assignment 1,
+    Contains all the plotting functions for ENEL420-20S2 Assignment 1,
     including supporting functions.
 
-    Authors: Matt Blake   (58979250),
-             Reweti Davis (23200856).
+    Authors: Matt Blake   (58979250)
+             Reweti Davis (23200856)
+             Group Number: 18
     Last Modified: 07/08/2020
 """
 

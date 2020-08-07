@@ -1,6 +1,6 @@
 """
     main.py
-    The main module for ENEL420-S2 Assignment 1.
+    The main module for ENEL420-20S2 Assignment 1.
     This module imports ECG data from a .txt and
     creates IIR and FIR notch filters to reduce
     narrowband noise from the data. Figures of
