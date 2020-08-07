@@ -20,7 +20,6 @@ import numpy as np
 def plotECG(samples, time):
     """Plot a time domain graph of the ECG data"""
 
-    # Plot ECG
     plt.figure()
     plt.plot(time, samples)
     plt.xlabel("Time (s)")
@@ -33,52 +32,61 @@ def plotECG(samples, time):
 def plotECGSpectrum(frequency, frequency_data):
     """Calculate and plot the frequency spectrum of the ECG"""
 
-    # Plot ECG Spectrum
     plt.figure()
     plt.plot(frequency, 20 * np.log10(abs(frequency_data)))
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the ECG signal")
-    plt.xlim(frequency[0], frequency[-1] / 2) # Limit the x axis to locations with data points
+    plt.xlim(frequency[0], frequency[-1]/2) # Limit the x axis to locations with data points
 
 
 
 #
 # IIR Notch Plots
 #
-def plotNotchedECG(samples, time):
-    """Plot a time domain graph of the ECG data"""
+def plotIIRNotchECG(samples, time):
+    """Plot a time domain graph of the IIR notch filtered ECG data"""
 
-    # Plot ECG
     plt.figure()
     plt.plot(time, samples)
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude (uV)")
-    plt.suptitle("Time domain notch filtered ECG signal")
+    plt.suptitle("Time domain IIR Notch Filtered ECG signal")
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
 
 
 
-def plotIIRNotchFilterResponse(numuerator, denominator):
-    """Plot the frequency response of the window filter."""
+def plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data):
+    """Calculate and plot the frequency spectrum of the ECG after filtering with an IIR notch filter"""
 
-    w, h = freqz(numuerator, denominator)
+    plt.figure()
+    plt.plot(notch_frequency, 20 * np.log10(abs(notch_freq_data)))
+    plt.xlabel("Frequency (Hz)")
+    plt.ylabel("Amplitude (dB)")
+    plt.suptitle("Frequency Spectrum of the IIR Notch Filtered ECG signal")
+    plt.xlim(notch_frequency[0], notch_frequency[-1]/2)  # Limit the x axis to locations with data points
+
+
+
+def plotIIRNotchFilterResponse(numuerator, denominator):
+    """Plot the frequency response of the window filter"""
+
+    w, h = freqz(numuerator, denominator) # Calculate the frequency response
     w_scaled = 1024 * w / (2 * np.pi)
     plt.figure()
     plt.plot(w_scaled, 20 * np.log10(abs(h))) #Plot in dB vs Hz
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
-    plt.suptitle("Frequency Spectrum of the notch Filtered ECG Signal")
-    plt.xlim(w_scaled[0], w_scaled[-1]) # Limit the x axis from 0 to nyquist frequency
+    plt.suptitle("Frequency Spectrum of the Notch Filtered ECG Signal")
+    plt.xlim(w_scaled[0], w_scaled[-1]) # Limit the x axis from 0 to Nyquist frequency
 
 
 #
 # Window Filtered Plots
 #
 def plotWindowedECG(samples, time):
-    """Plot the ECG which has filtered by a window filter."""
+    """Plot a time domain graph of the window filtered ECG data"""
 
-    # Plot Windowed ECG
     plt.figure()
     plt.plot(time, samples)
     plt.xlabel("Time (s)")
@@ -89,21 +97,21 @@ def plotWindowedECG(samples, time):
 
 
 def plotWindowedECGSpectrum(frequency, frequency_data):
-    """Calculate and plot the ECG frequency spectrum."""
+    """Calculate and plot the indow filtered ECG frequency spectrum"""
 
-    # Plot window filtered ECG Spectrum
     plt.figure()
     plt.plot(frequency, 20 * np.log10(abs(frequency_data)))
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the Window Filtered ECG Signal")
-    plt.xlim(frequency[0], frequency[-1]/2) # Limit the x axis from 0 to nyquist frequency
+    plt.xlim(frequency[0], frequency[-1]/2) # Limit the x axis from 0 to Nyquist frequency
 
 
 
 def plotWindowFilterResponse(filter_array):
-    """Plot the frequency response of the window filter."""
-    w, h = freqz(filter_array)
+    """Plot the frequency response of the window filter"""
+
+    w, h = freqz(filter_array) # Calculate the frequency response
     w_scaled = 1024 * w / (2 * np.pi)
     plt.figure()
     plt.plot(w_scaled, 20 * np.log10(abs(h))) #Plot in dB vs Hz
@@ -111,4 +119,3 @@ def plotWindowFilterResponse(filter_array):
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Window Filter Frequency Response")
     plt.xlim(w_scaled[0], w_scaled[-1]) # Limit the x axis from 0 to nyquist frequency
-
