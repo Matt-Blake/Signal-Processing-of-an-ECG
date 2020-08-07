@@ -1,3 +1,3 @@
-The mean power removed by the IIR notch filters is 22348.7 μW
-The mean power removed by the first IIR notch filter is 4901.2 μW
-The mean power removed by the second IIR notch filter is 17447.4 μW
+The mean power removed by the IIR notch filters is 22348.7 nW
+The mean power removed by the first IIR notch filter is 4901.2 nW
+The mean power removed by the second IIR notch filter is 17447.4 nW

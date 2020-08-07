@@ -215,9 +215,8 @@ def saveNoisePowerData(noise_power_data, noise_power_output_filename):
     """Iterate through a list of filters, saving the noise power (variance) data"""
 
     # Create text to write and file to write to
-    microwatt_symbol = '\u03BC' + 'W'  # Microvolt symbol using unicode
     variance_text_1 = 'The mean power removed by the '  # The first section of the text string to print
-    variance_text_2 = ' is {:.1f} ' + microwatt_symbol + '\n' # The section section of the text string to print
+    variance_text_2 = ' is {:.1f} nW\n' # The section section of the text string to print
     outputfile = createClean(noise_power_output_filename)  # Create output file
 
     # Write data to file
@@ -229,9 +228,6 @@ def saveNoisePowerData(noise_power_data, noise_power_output_filename):
 
 def main():
     """Main function of ENEL420 Assignment 1"""
-
-    # Close any open graphs
-    plt.close('all')
 
     # Define filenames
     filename = 'enel420_grp_18.txt' # Location in project where ECG data is stored
