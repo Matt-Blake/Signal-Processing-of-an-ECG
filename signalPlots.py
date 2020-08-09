@@ -150,7 +150,7 @@ def plotWindowFilterResponse(filter_array, f_samp):
      window_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
      # Plot phase response
-     window_ax2.plot(freq, np.angle(response, deg=True))  # Plot phase in dB vs degrees
+     window_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)))  # Plot phase in dB vs degrees
      window_ax2.set_ylabel("Phase (°)")
      window_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
