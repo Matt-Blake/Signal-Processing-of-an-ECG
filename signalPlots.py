@@ -78,15 +78,25 @@ def plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data):
 
 
 def plotIIRNotchFilterResponse(numuerator, denominator, f_samp):
-    """Plot the frequency response of the window filter"""
+    """Plot and return the frequency response (magnitude and phase) of the IIR notch filter"""
 
-    freq, response = freqz(numuerator, denominator, fs=f_samp) # Calculate the frequency response
-    IIRNotchFilterResponse = plt.figure()
-    plt.plot(freq, 20 * np.log10(abs(response))) # Plot in dB vs Hz
+    # Calculate the frequency response
+    freq, response = freqz(numuerator, denominator, fs=f_samp)
+
+    # Create plot
+    IIRNotchFilterResponse, (IIR_ax1, IIR_ax2) = plt.subplots(2, 1)
+    plt.suptitle("IIR Notch Filter Frequency Response")
     plt.xlabel("Frequency (Hz)")
-    plt.ylabel("Amplitude (dB)")
-    plt.suptitle("Frequency Spectrum of the Notch Filtered ECG Signal")
-    plt.xlim(freq[0], freq[-1]) # Limit the x axis from 0 to Nyquist frequency
+
+    # Plot magnitude response
+    IIR_ax1.plot(freq, 20 * np.log10(abs(response))) # Plot magnitude in dB vs Hz
+    IIR_ax1.set_ylabel("Amplitude (dB)")
+    IIR_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
+
+    # Plot phase response
+    IIR_ax2.plot(freq, np.angle(response, deg=True)) # Plot phase in dB vs degrees
+    IIR_ax2.set_ylabel("Phase (°)")
+    IIR_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
     return IIRNotchFilterResponse
 
@@ -110,7 +120,7 @@ def plotWindowedECG(samples, time):
 
 
 def plotWindowedECGSpectrum(frequency, frequency_data):
-    """Calculate and plot the indow filtered ECG frequency spectrum"""
+    """Calculate and plot the window filtered ECG frequency spectrum"""
 
     WindowedECGSpectrum = plt.figure()
     plt.plot(frequency, 20 * np.log10(abs(frequency_data)))
@@ -124,14 +134,24 @@ def plotWindowedECGSpectrum(frequency, frequency_data):
 
 
 def plotWindowFilterResponse(filter_array, f_samp):
-    """Plot the frequency response of the window filter"""
+     """Plot and return the frequency response (magnitude and phase) of the window filter"""
 
-    freq, response = freqz(filter_array, fs=f_samp) # Calculate the frequency response
-    WindowFilterResponse = plt.figure()
-    plt.plot(freq, 20 * np.log10(abs(response))) # Plot in dB vs Hz
-    plt.xlabel("Frequency (Hz)")
-    plt.ylabel("Amplitude (dB)")
-    plt.suptitle("Window Filter Frequency Response")
-    plt.xlim(freq[0], freq[-1]) # Limit the x axis from 0 to nyquist frequency
+     # Calculate the frequency response
+     freq, response = freqz(filter_array, fs=f_samp)
 
-    return WindowFilterResponse
+     # Create plot
+     WindowFilterResponse, (window_ax1, window_ax2) = plt.subplots(2, 1)
+     plt.suptitle("Window Filter Frequency Response")
+     plt.xlabel("Frequency (Hz)")
+
+     # Plot magnitude response
+     window_ax1.plot(freq, 20 * np.log10(abs(response)))  # Plot magnitude in dB vs Hz
+     window_ax1.set_ylabel("Amplitude (dB)")
+     window_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
+
+     # Plot phase response
+     window_ax2.plot(freq, np.angle(response, deg=True))  # Plot phase in dB vs degrees
+     window_ax2.set_ylabel("Phase (°)")
+     window_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
+
+     return WindowFilterResponse
