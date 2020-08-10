@@ -155,3 +155,56 @@ def plotWindowFilterResponse(filter_array, f_samp):
      window_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
      return WindowFilterResponse
+
+
+#Optimal filter plots
+def plotOptimalECG(samples, time):
+    """Plot a time domain graph of the window filtered ECG data"""
+
+    OptimalECG = plt.figure()
+    plt.plot(time, samples)
+    plt.xlabel("Time (s)")
+    plt.ylabel("Amplitude (uV)")
+    plt.suptitle("Time Domain Optimal Filtered ECG Signal")
+    plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
+
+    return OptimalECG
+
+
+
+def plotOptimalECGSpectrum(frequency, frequency_data):
+    """Calculate and plot the window filtered ECG frequency spectrum"""
+
+    OptimalECGSpectrum = plt.figure()
+    plt.plot(frequency, 20 * np.log10(abs(frequency_data)))
+    plt.xlabel("Frequency (Hz)")
+    plt.ylabel("Amplitude (dB)")
+    plt.suptitle("Frequency Spectrum of the Optimal Filtered ECG Signal")
+    plt.xlim(frequency[0], frequency[-1]/2) # Limit the x axis from 0 to Nyquist frequency
+
+    return OptimalECGSpectrum
+
+
+
+def plotOptimalFilterResponse(filter_array, f_samp):
+     """Plot and return the frequency response (magnitude and phase) of the window filter"""
+
+     # Calculate the frequency response
+     freq, response = freqz(filter_array, fs=f_samp)
+
+     # Create plot
+     OptimalFilterResponse, (optimal_ax1, optimal_ax2) = plt.subplots(2, 1)
+     plt.suptitle("Optimal Filter Frequency Response")
+     plt.xlabel("Frequency (Hz)")
+
+     # Plot magnitude response
+     optimal_ax1.plot(freq, 20 * np.log10(abs(response)))  # Plot magnitude in dB vs Hz
+     optimal_ax1.set_ylabel("Amplitude (dB)")
+     optimal_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
+
+     # Plot phase response
+     optimal_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)))  # Plot phase in dB vs degrees
+     optimal_ax2.set_ylabel("Phase (°)")
+     optimal_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
+
+     return OptimalFilterResponse
