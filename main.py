@@ -181,7 +181,6 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains):
     NUM_TAPS = 399 #Max number of taps allowed
     f1, f2 = notches
     width = notch_width /1.0 #One sided 3dB bandwidth, in Hz
-    ny = sample_rate / 2.0
 
     bands= [0, (f1 - width), f1, f1, (f1 + width), (f2 - width), f2, f2, (f2 + width), sample_rate/2]
     filter_array = remez(numtaps=NUM_TAPS, bands=bands, desired=gains, fs=sample_rate)
