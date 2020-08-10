@@ -231,12 +231,12 @@ def main():
 
     # Define filenames
     filename = 'enel420_grp_18.txt' # Location in project where ECG data is stored
-    figures_filename = 'Group 18: Figures' # Folder to save created figure images to
-    noise_power_output_filename = 'Group 18: Noise Power (Variance) Data from Created Filters.txt' # File to save calculated noise power data
-    figure_names = ['ECG Time Plot.png', 'ECG Freq Plot.png', 'IIR Notched ECG Time Plot.png',
-                    'IIR Notched Freq Plot.png',
-                    'IIR Frequency Response.png', 'Windowed ECG Time Plot.png', 'Windowed Freq Plot.png',
-                    'Windowed Frequency Response.png']  # The names that each figure should be saved as
+    figures_filename = 'Group_18_Figures' # Folder to save created figure images to
+    noise_power_output_filename = 'Group_18_Noise_Power_(Variance)_Data_from_Created_Filters.txt' # File to save calculated noise power data
+    figure_names = ['ECG_Time_Plot.png', 'ECG_Freq_Plot.png', 'IIR_Notched_ECG_Time_Plot.png',
+                    'IIR_Notched_Freq_Plot.png',
+                    'IIR_Frequency_Response.png', 'Windowed_ECG_Time_Plot.png', 'Windowed_Freq_Plot.png',
+                    'Windowed_Frequency_Response.png']  # The names that each figure should be saved as
 
     # Define filter and data parameters
     sample_rate = 1024  # Sample rate of data (Hz)
