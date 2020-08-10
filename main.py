@@ -181,15 +181,9 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains):
     NUM_TAPS = 399 #Max number of taps allowed
     f1, f2 = notches
     width = notch_width / 1.3 #One sided 3dB bandwidth, in Hz
-
+    gain = np.power(10, np.array(gains)/20)
     bands= [0, (f1 - width), f1, f1, (f1 + width), (f2 - width), f2, f2, (f2 + width), sample_rate/2]
-    filter_array = remez(numtaps=NUM_TAPS, bands=bands, desired=gains, fs=sample_rate)
-
-    #Following lines are for interest, hp and lp, to erradicate excess noise in signal...
-    # hp = firwin(numtaps=NUM_TAPS, cutoff=(10/ny), pass_zero=False)
-    # lp = firwin(numtaps=NUM_TAPS, cutoff=(100/ny))
-    # hectic = convolve(hp, filter_array)
-    # filter_array = convolve(hectic, lp)
+    filter_array = remez(numtaps=NUM_TAPS, bands=bands, desired=gain, fs=sample_rate)
     
     return filter_array
 
@@ -200,16 +194,10 @@ def createFreqSamplingFilter(notches, sample_rate, notch_width, gains):
     NUM_TAPS = 399 #Max number of taps allowed
     f1, f2 = notches
     width = notch_width / 0.5 #One sided 3dB bandwidth, in Hz
-
+    gain = np.power(10, np.array(gains)/20)
     freq = [0, (f1 - width), f1, (f1 + width), (f2 - width), f2, (f2 + width), sample_rate/2]
-    # freq = [0, f1, f1, f2, f2, sample_rate/2]
-    filter_array = firwin2(numtaps=NUM_TAPS, freq=freq, gain=gains, fs=sample_rate, window=('kaiser', 0.1))
-
-    #Following lines are for interest, hp and lp, to erradicate excess noise in signal...
-    # hp = firwin(numtaps=NUM_TAPS, cutoff=(10/ny), pass_zero=False)
-    # lp = firwin(numtaps=NUM_TAPS, cutoff=(100/ny))
-    # hectic = convolve(hp, filter_array)
-    # filter_array = convolve(hectic, lp)
+ 
+    filter_array = firwin2(numtaps=NUM_TAPS, freq=freq, gain=gain, fs=sample_rate, window=('kaiser', 0.1))
     
     return filter_array
 
@@ -281,9 +269,9 @@ def main():
     sample_rate = 1024  # Sample rate of data (Hz)
     cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
-    optimal_gains = [1, 0, 1, 0, 1]
-    freq_gains = [1, 1, 0, 1, 1, 0, 1, 1]
-    # freq_gains = [1, 1, 0, 1, 0, 1]
+    optimal_gains = [1, -80, 1, -80, 1]
+    freq_gains = [1, 1, -80, 1, 1, -80, 1, 1]
+
 
     # Gather data from input files
     samples = importData(filename) # Import data from file
@@ -339,8 +327,6 @@ def main():
     FrequencySamplingECG = plotFrequencySampledECG(optimal_samples, opt_time) # Plot a time domain graph of the window filtered ECG data
     FrequencySamplingECGSpectrum = plotFrequencySampledECGSpectrum(freq_s_frequency, freq_s_freq_data) # Plot the frequency spectrum of the window filtered ECG data
     FrequencySamplingFilterResponse = plotFrequencySampledFilterResponse(freq_sampling_filter, sample_rate) # Plot the frequency response of the window filter
-
-
 
     # Save figures
     figures = [ECG, ECGSpectrum, IIRNotchECG, IIRNotchECGSpectrum, IIRNotchFilterResponse, WindowedECG, WindowedECGSpectrum,
