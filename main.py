@@ -176,7 +176,7 @@ def createWindowFilter(notches, sample_rate, notch_width):
 
 
 def createOptimalFilter(notches, sample_rate, notch_width, gains):
-    """Compute and return the bandstop  window filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
+    """Compute and return the bandstop  optimal filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
 
     NUM_TAPS = 399 #Max number of taps allowed
     f1, f2 = notches
@@ -193,6 +193,25 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains):
     
     return filter_array
 
+
+def createFreqSamplingFilter(notches, sample_rate, notch_width, gains):
+    """Compute and return the bandstop frequency sampling filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
+
+    NUM_TAPS = 399 #Max number of taps allowed
+    f1, f2 = notches
+    width = notch_width / 0.5 #One sided 3dB bandwidth, in Hz
+
+    freq = [0, (f1 - width), f1, (f1 + width), (f2 - width), f2, (f2 + width), sample_rate/2]
+    # freq = [0, f1, f1, f2, f2, sample_rate/2]
+    filter_array = firwin2(numtaps=NUM_TAPS, freq=freq, gain=gains, fs=sample_rate, window=('kaiser', 0.1))
+
+    #Following lines are for interest, hp and lp, to erradicate excess noise in signal...
+    # hp = firwin(numtaps=NUM_TAPS, cutoff=(10/ny), pass_zero=False)
+    # lp = firwin(numtaps=NUM_TAPS, cutoff=(100/ny))
+    # hectic = convolve(hp, filter_array)
+    # filter_array = convolve(hectic, lp)
+    
+    return filter_array
 
 def createClean(filename, directory=False):
     """Create a file/folder at the target location and returns the path to this if it is a folder or a the file ready
@@ -254,13 +273,17 @@ def main():
     figure_names = ['ECG_Time_Plot.png', 'ECG_Freq_Plot.png', 'IIR_Notched_ECG_Time_Plot.png',
                     'IIR_Notched_Freq_Plot.png',
                     'IIR_Frequency_Response.png', 'Windowed_ECG_Time_Plot.png', 'Windowed_Freq_Plot.png',
-                    'Windowed_Frequency_Response.png']  # The names that each figure should be saved as
+                    'Windowed_Frequency_Response.png',
+                    'Optimal_ECG_Time_Plot.png', 'Optimal_Freq_Plot.png', 'Optimal_Frequency_Response.png',
+                    'Freq_Sampled_ECG_Time_Plot.png', 'Freq_Sampled_Freq_Plot.png', 'Freq_Sampled_Frequency_Response.png']  # The names that each figure should be saved as
 
     # Define filter and data parameters
     sample_rate = 1024  # Sample rate of data (Hz)
     cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
-    desired_gains = [1, 0, 1, 0, 1]
+    optimal_gains = [1, 0, 1, 0, 1]
+    freq_gains = [1, 1, 0, 1, 1, 0, 1, 1]
+    # freq_gains = [1, 1, 0, 1, 0, 1]
 
     # Gather data from input files
     samples = importData(filename) # Import data from file
@@ -280,36 +303,50 @@ def main():
     win_time = getTimeData(sample_rate, len(windowed_samples)) # Create a time array based on window filtered data
     win_frequency, win_freq_data = calcFreqSpectrum(windowed_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
 
-    optimal_filter = createOptimalFilter(cutoff, sample_rate, notch_width, desired_gains)
+    optimal_filter = createOptimalFilter(cutoff, sample_rate, notch_width, optimal_gains)
     optimal_samples = convolve(samples, optimal_filter)
     opt_time = getTimeData(sample_rate, len(optimal_samples)) # Create a time array based on optimal filtered data
     opt_frequency, opt_freq_data = calcFreqSpectrum(optimal_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
     
+    
+    freq_sampling_filter = createFreqSamplingFilter(cutoff, sample_rate, notch_width, freq_gains)
+    freq_sampling_samples = convolve(samples, freq_sampling_filter)
+    freq_sampling_time = getTimeData(sample_rate, len(freq_sampling_samples)) # Create a time array based on optimal filtered data
+    freq_s_frequency, freq_s_freq_data = calcFreqSpectrum(freq_sampling_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
+    
+
+
     # Plot unfiltered data
-    # ECG = plotECG(samples, base_time) # Plot a time domain graph of the ECG data
-    # ECGSpectrum = plotECGSpectrum(base_freq, base_freq_data) # Plot the frequency spectrum of the ECG data
+    ECG = plotECG(samples, base_time) # Plot a time domain graph of the ECG data
+    ECGSpectrum = plotECGSpectrum(base_freq, base_freq_data) # Plot the frequency spectrum of the ECG data
 
     # # Plot IIR notch filtered data
-    # IIRNotchECG = plotIIRNotchECG(notched_samples, notch_time) # Plot a time domain graph of the IIR notch filtered ECG data
-    # IIRNotchECGSpectrum = plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data) # Plot the frequency spectrum of the IIR notch filtered ECG data
-    # IIRNotchFilterResponse = plotIIRNotchFilterResponse(notched_numerator, notched_denominator, sample_rate) # Plot the frequency response of the notch filter
+    IIRNotchECG = plotIIRNotchECG(notched_samples, notch_time) # Plot a time domain graph of the IIR notch filtered ECG data
+    IIRNotchECGSpectrum = plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data) # Plot the frequency spectrum of the IIR notch filtered ECG data
+    IIRNotchFilterResponse = plotIIRNotchFilterResponse(notched_numerator, notched_denominator, sample_rate) # Plot the frequency response of the notch filter
 
     # # Plot window filtered data
-    # WindowedECG = plotWindowedECG(windowed_samples, win_time) # Plot a time domain graph of the window filtered ECG data
-    # WindowedECGSpectrum = plotWindowedECGSpectrum(win_frequency, win_freq_data) # Plot the frequency spectrum of the window filtered ECG data
-    # WindowFilterResponse = plotWindowFilterResponse(window_filter, sample_rate) # Plot the frequency response of the window filter
+    WindowedECG = plotWindowedECG(windowed_samples, win_time) # Plot a time domain graph of the window filtered ECG data
+    WindowedECGSpectrum = plotWindowedECGSpectrum(win_frequency, win_freq_data) # Plot the frequency spectrum of the window filtered ECG data
+    WindowFilterResponse = plotWindowFilterResponse(window_filter, sample_rate) # Plot the frequency response of the window filter
 
     #Plot optimal filtered data
-    # OptimalECG = plotOptimalECG(optimal_samples, opt_time) # Plot a time domain graph of the window filtered ECG data
+    OptimalECG = plotOptimalECG(optimal_samples, opt_time) # Plot a time domain graph of the window filtered ECG data
     OptimalECGSpectrum = plotOptimalECGSpectrum(opt_frequency, opt_freq_data) # Plot the frequency spectrum of the window filtered ECG data
     OptimalFilterResponse = plotOptimalFilterResponse(optimal_filter, sample_rate) # Plot the frequency response of the window filter
 
+    #Plot Frequency Sampling filtered data
+    FrequencySamplingECG = plotFrequencySampledECG(optimal_samples, opt_time) # Plot a time domain graph of the window filtered ECG data
+    FrequencySamplingECGSpectrum = plotFrequencySampledECGSpectrum(freq_s_frequency, freq_s_freq_data) # Plot the frequency spectrum of the window filtered ECG data
+    FrequencySamplingFilterResponse = plotFrequencySampledFilterResponse(freq_sampling_filter, sample_rate) # Plot the frequency response of the window filter
 
 
-    # # Save figures
-    # figures = [ECG, ECGSpectrum, IIRNotchECG, IIRNotchECGSpectrum, IIRNotchFilterResponse, WindowedECG, WindowedECGSpectrum,
-    #            WindowFilterResponse] # The figures to save, which must be in the same order as figure_names
-    # saveFigures(figures, figures_filename, figure_names) # Save the figures to an output folder in the current directory
+
+    # Save figures
+    figures = [ECG, ECGSpectrum, IIRNotchECG, IIRNotchECGSpectrum, IIRNotchFilterResponse, WindowedECG, WindowedECGSpectrum,
+               WindowFilterResponse, OptimalECG, OptimalECGSpectrum, OptimalFilterResponse,
+               FrequencySamplingECG, FrequencySamplingECGSpectrum, FrequencySamplingFilterResponse] # The figures to save, which must be in the same order as figure_names
+    saveFigures(figures, figures_filename, figure_names) # Save the figures to an output folder in the current directory
 
     # Calculate the variance of data
     notched_noise_variance = calculateNoiseVariance(samples, notched_samples)  # Calculate the variance of the noise removed by the IIR notch filters
@@ -321,7 +358,7 @@ def main():
                         'first IIR notch filter': first_notched_noise_variance,
                         'second IIR notch filter': second_notched_noise_variance}  # Create a dictionary of the filter name and its noise power
     saveNoisePowerData(noise_power_data, noise_power_output_filename)  # Save the data about each filter to a file
-    plt.show()
+    # plt.show()
 
 
 
