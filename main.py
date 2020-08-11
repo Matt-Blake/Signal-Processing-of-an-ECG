@@ -24,6 +24,7 @@ import shutil
 from signalPlots import *
 
 
+
 # Functions
 def importData(filename):
     """Import data from a text file"""
@@ -175,6 +176,7 @@ def createWindowFilter(notches, sample_rate, notch_width):
     return filter_array
 
 
+
 def createOptimalFilter(notches, sample_rate, notch_width, gains):
     """Compute and return the bandstop  optimal filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
 
@@ -186,6 +188,7 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains):
     filter_array = remez(numtaps=NUM_TAPS, bands=bands, desired=gain, fs=sample_rate)
     
     return filter_array
+
 
 
 def createFreqSamplingFilter(notches, sample_rate, notch_width, gains):
@@ -200,6 +203,8 @@ def createFreqSamplingFilter(notches, sample_rate, notch_width, gains):
     filter_array = firwin2(numtaps=NUM_TAPS, freq=freq, gain=gain, fs=sample_rate, window=('kaiser', 0.1))
     
     return filter_array
+
+
 
 def createClean(filename, directory=False):
     """Create a file/folder at the target location and returns the path to this if it is a folder or a the file ready
@@ -272,7 +277,6 @@ def main():
     optimal_gains = [1, -80, 1, -80, 1]
     freq_gains = [1, 1, -80, 1, 1, -80, 1, 1]
 
-
     # Gather data from input files
     samples = importData(filename) # Import data from file
     base_time = getTimeData(sample_rate, len(samples)) # Create a time array based on imported data
@@ -301,8 +305,6 @@ def main():
     freq_sampling_samples = convolve(samples, freq_sampling_filter)
     freq_sampling_time = getTimeData(sample_rate, len(freq_sampling_samples)) # Create a time array based on optimal filtered data
     freq_s_frequency, freq_s_freq_data = calcFreqSpectrum(freq_sampling_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
-    
-
 
     # Plot unfiltered data
     ECG = plotECG(samples, base_time) # Plot a time domain graph of the ECG data
