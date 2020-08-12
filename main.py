@@ -164,15 +164,15 @@ def combineFilters(numerator_1, denominator_1, numerator_2, denominator_2):
 
 
 #
-# FIR filter functions
+# FIR Filter functions
 #
-def createWindowFilter(notches, sample_rate, notch_width, num_taps):
-    """Compute and return the bandstop window filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
+def createWindowFilter(notches, sample_rate, notch_width):
+    """Compute and return the bandstop  window filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
 
-    window = ('kaiser', 2)
+    NUM_TAPS = 399 #Max number of taps allowed
+    window = ('kaiser', 4)
     f1, f2 = notches
-    width = notch_width / 1.2 #One sided 3dB bandwidth, in Hz
-    ny = sample_rate / 2.0
+    width = notch_width / 1.3 #One sided 3dB bandwidth, in Hz
 
     cutoff_1 = [(f1 - width), (f1 + width)]
     cutoff_2 = [(f2 - width), (f2 + width)]
@@ -187,9 +187,10 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains, num_taps):
     """Compute and return the bandstop  optimal filter arrays for the specified notches. Adjusting the window type and band width changes attenuation."""
 
     f1, f2 = notches
-    width = notch_width / 1.0 #One sided 3dB bandwidth, in Hz
+    width = notch_width / 0.8 #One sided 3dB bandwidth, in Hz
     #gain = np.power(10, np.array(gains)/20)
-    weight = [1, 0.1, 1]
+    weight = [0.7, 1.2, 0.7]
+    
 
     band_1= [0,  f1 - width, f1 - 1, f1 + 1, f1 + width, sample_rate / 2] #Pad the stop band as the method doesnt convege well otherwise
     band_2= [0, f2 - width, f2 - 1, f2 + 1, f2 + width, sample_rate / 2]
@@ -205,7 +206,7 @@ def createFreqSamplingFilter(notches, sample_rate, notch_width, gains, num_taps)
     """Compute and return the bandstop frequency sampling filter arrays for the specified notches. Adjusting the window type and band width changes attenuation."""
 
     f1, f2 = notches
-    window_type = ('kaiser', 0.1)
+    window_type = ('kaiser', 5)
     width = notch_width / 0.5 #One sided 3dB bandwidth, in Hz
     #gain = np.power(10, np.array(gains)/20.0)
 
@@ -296,35 +297,6 @@ def saveFigures(figures, figures_location, figure_names):
     for i in range(len(figures)):
         plt.figure(figures[i].number) # Set the figure as the current figure
         plt.savefig(output_path + '/' + figure_names[i]) # Save the current figure
-
-
-
-def calculateVariance(data):
-    """Calculates and returns the variance of a signal"""
-
-    # Calculate the variance of the signal X using: variance = E[X^2] - E[X]^2
-    expected_data_power = sum((np.square(data)))/len(data)  # Calculate E[X^2]
-    power_of_expected_data = np.square(sum(data)/len(data))  # Calculate E[X]^2
-    variance_data = expected_data_power - power_of_expected_data  # Calculate the variance of the data
-
-    return variance_data
-
-
-
-def calculateNoiseVariance(data, filtered_data):
-    """"Calculate the variance of the noise by comparing the filtered and unfiltered data. The variance of the noise
-    is approximated as the variance of the signal removed by the filter"""
-
-    # Turn data arrays into numpy arrays so that mathematical operations can be performed
-    np_data = np.array(data)
-    np_filtered_data = np.array(filtered_data)
-
-    # Calculate the variance of the removed noise by finding the variances of the filtered and unfiltered data
-    data_variance = calculateVariance(np_data) # Calculate the variance of the unfiltered data
-    filtered_data_variance = calculateVariance(np_filtered_data) # Calculat the variance of the filtered data
-    noise_data_variance = data_variance - filtered_data_variance # Calculate the variance of the removed noise
-
-    return noise_data_variance
 
 
 
@@ -459,8 +431,7 @@ def main():
                         'second frequency sampling filter': second_freq_sampling_noise_variance
                         }  # Create a dictionary of the filter name and its noise power
     saveNoisePowerData(noise_power_data, noise_power_output_filename)  # Save the data about each filter to a file
-
-    #plt.show()
+    plt.show()
     
 
 
