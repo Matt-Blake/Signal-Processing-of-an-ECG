@@ -346,7 +346,7 @@ def main():
                         'first IIR notch filter': first_notched_noise_variance,
                         'second IIR notch filter': second_notched_noise_variance}  # Create a dictionary of the filter name and its noise power
     saveNoisePowerData(noise_power_data, noise_power_output_filename)  # Save the data about each filter to a file
-    # plt.show()
+    #plt.show()
 
 
 

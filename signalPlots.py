@@ -24,7 +24,7 @@ def plotECG(samples, time):
     ECG = plt.figure()
     plt.plot(time, samples)
     plt.xlabel("Time (s)")
-    plt.ylabel("Amplitude (uV)")
+    plt.ylabel("Amplitude (µV)")
     plt.suptitle("Time domain ECG signal")
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
 
@@ -55,7 +55,7 @@ def plotIIRNotchECG(samples, time):
     IIRNotchECG = plt.figure()
     plt.plot(time, samples)
     plt.xlabel("Time (s)")
-    plt.ylabel("Amplitude (uV)")
+    plt.ylabel("Amplitude (µV)")
     plt.suptitle("Time domain IIR Notch Filtered ECG signal")
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
 
@@ -111,7 +111,7 @@ def plotWindowedECG(samples, time):
     WindowedECG = plt.figure()
     plt.plot(time, samples)
     plt.xlabel("Time (s)")
-    plt.ylabel("Amplitude (uV)")
+    plt.ylabel("Amplitude (µV)")
     plt.suptitle("Time Domain Window Filtered ECG Signal")
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
 
@@ -164,7 +164,7 @@ def plotOptimalECG(samples, time):
     OptimalECG = plt.figure()
     plt.plot(time, samples)
     plt.xlabel("Time (s)")
-    plt.ylabel("Amplitude (uV)")
+    plt.ylabel("Amplitude (µV)")
     plt.suptitle("Time Domain Optimal Filtered ECG Signal")
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
 
@@ -217,7 +217,7 @@ def plotFrequencySampledECG(samples, time):
     freqSampledECG = plt.figure()
     plt.plot(time, samples)
     plt.xlabel("Time (s)")
-    plt.ylabel("Amplitude (uV)")
+    plt.ylabel("Amplitude (µV)")
     plt.suptitle("Time Domain Frequency Sampling Filtered ECG Signal")
     plt.xlim(time[0], time[-1]) # Limit the x axis to locations with data points
 
