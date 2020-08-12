@@ -417,7 +417,7 @@ def main():
                         'first optimal filter': first_optimal_noise_variance,
                         'second optimal filter': second_optimal_noise_variance,
                         'FIR Frequency Sampling filters': freq_sampling_noise_variance,
-                        'first frequnecy sampling filter': first_freq_sampling_noise_variance,
+                        'first frequency sampling filter': first_freq_sampling_noise_variance,
                         'second frequency sampling filter': second_freq_sampling_noise_variance
                         }  # Create a dictionary of the filter name and its noise power
     saveNoisePowerData(noise_power_data, noise_power_output_filename)  # Save the data about each filter to a file
