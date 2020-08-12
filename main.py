@@ -294,7 +294,7 @@ def saveNoisePowerData(noise_power_data, noise_power_output_filename):
 
     # Create text to write and file to write to
     variance_text_1 = 'The mean power removed by the '  # The first section of the text string to print
-    variance_text_2 = ' is {:.1f} nW\n' # The section section of the text string to print
+    variance_text_2 = ' is {:.1f} pW\n' # The section section of the text string to print
     outputfile = createClean(noise_power_output_filename)  # Create output file
 
     # Write data to file
