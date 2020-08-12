@@ -26,6 +26,10 @@ from signalPlots import *
 
 
 # Functions
+
+#
+# Get data information functions
+#
 def importData(filename):
     """Import data from a text file"""
 
@@ -65,6 +69,9 @@ def calcFreqSpectrum(samples, sample_rate):
 
 
 
+#
+# IIR filter functions
+#
 def computeIIRNotchCoefficients(notch_freq, notch_width, sampling_freq):
     """Compute and return the optimal notch filter coefficients, based on the notch frequency, the 3 dB width of the
     notch and the sampling frequency"""
@@ -95,19 +102,49 @@ def computeIIRNotchCoefficients(notch_freq, notch_width, sampling_freq):
 
 
 
-def createIIRNotchFilters(notch_freq_1, notch_freq_2, notch_width, sample_rate):
-    """Create notch filters, then combine them. The coefficients of the filters are returned"""
+def calculateGainFactor(numerator, denominator, passband_freq, sampling_freq):
+    """Calculate and return the coefficent needed to normalise the passband gain of an IIR filter to unity"""
 
-    # Create notch filters
-    numerator_1, denominator_1 = computeIIRNotchCoefficients(notch_freq_1, notch_width, sample_rate)  # Calculate notch filter coefficents for the first notch frequency
-    numerator_2, denominator_2 = computeIIRNotchCoefficients(notch_freq_2, notch_width, sample_rate)  # Calculate notch filter coefficents for the second notch frequency
+    # Calculate passband angle
+    angle = 2 * np.pi * passband_freq/sampling_freq
 
-    return numerator_1, denominator_1, numerator_2, denominator_2
+    # Initalise sum of the numerator/denominator at the passband_freq
+    numerator_sum = 0
+    denominator_sum = 0
+
+    # Calculate the value of the numerator and denominator by iterating through each tap
+    for delay_index in range(len(numerator)):
+
+        # Calculate the value of the numerator at tap
+        numerator_coeff = numerator[delay_index] # Extract numerator tap coefficent
+        numerator_sum += numerator_coeff * ((np.exp(1j * angle)) ** (-delay_index)) # Add transfer function value to numerator sum
+
+        # Calculate the value of the denominator at tap
+        denominator_coeff = denominator[delay_index] # Extract denominator tap coefficent
+        denominator_sum += denominator_coeff * ((np.exp(1j * angle)) ** (-delay_index))  # Add transfer function value to numerator sum
+
+    # Calculate gain factor
+    gain_factor = denominator_sum/numerator_sum # At unity gain: gain_factor * numerator_sum/denominator_sum = 1
+    gain_factor_real = np.real(gain_factor) # Take the real component of the gain factor
+    
+    return gain_factor_real
+
+
+
+
+def createIIRNotchFilter(notch_freq, notch_width, sample_rate):
+    """Create and return the coefficents of an IIR notch filter"""
+
+    numerator, denominator = computeIIRNotchCoefficients(notch_freq, notch_width, sample_rate)  # Calculate filter coefficents
+    gain_factor = calculateGainFactor(numerator, denominator, notch_freq, sample_rate) # Calculate gain factors needed to get unity gain in passband
+    normalised_numerator = np.array(numerator) * gain_factor  # Normalise passband of filters to unity gain
+
+    return normalised_numerator, denominator
 
 
 
 def applyIIRNotchFilters(numerator_1, denominator_1, numerator_2, denominator_2, data):
-    """Pass data through two cascaded notch filters and return the result after each filter"""
+    """Pass data through two cascaded IIR filters and return the result after each filter"""
 
     partially_filtered_data = lfilter(numerator_1, denominator_1, data) # Apply first filter to data
     filtered_data = lfilter(numerator_2, denominator_2, partially_filtered_data) # Apply second notch filter to data
@@ -127,38 +164,9 @@ def combineFilters(numerator_1, denominator_1, numerator_2, denominator_2):
 
 
 
-
-def calculateVariance(data):
-    """Calculates and returns the variance of a signal"""
-
-    # Calculate the variance of the signal X using: variance = E[X^2] - E[X]^2
-    expected_data_power = sum((np.square(data)))/len(data)  # Calculate E[X^2]
-    power_of_expected_data = np.square(sum(data)/len(data))  # Calculate E[X]^2
-    variance_data = expected_data_power - power_of_expected_data  # Calculate the variance of the data
-
-    return variance_data
-
-
-
-def calculateNoiseVariance(data, filtered_data):
-    """"Calculate the variance of the noise by comparing the filtered and unfiltered data. The variance of the noise
-    is approximated as the variance of the signal removed by the filter"""
-
-    # Turn data arrays into numpy arrays so that mathematical operations can be performed
-    np_data = np.array(data)
-    np_filtered_data = np.array(filtered_data)
-
-    # Calculate the variance of the removed noise by finding the variances of the filtered and unfiltered data
-    data_variance = calculateVariance(np_data) # Calculate the variance of the unfiltered data
-    filtered_data_variance = calculateVariance(np_filtered_data) # Calculat the variance of the filtered data
-    noise_data_variance = data_variance - filtered_data_variance # Calculate the variance of the removed noise
-
-    return noise_data_variance
-
-
 #
-# FIR Filter functions
-
+# FIR filter functions
+#
 def createWindowFilter(notches, sample_rate, notch_width, num_taps):
     """Compute and return the bandstop  window filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
 
@@ -213,11 +221,45 @@ def createFreqSamplingFilter(notches, sample_rate, notch_width, gains, num_taps)
 
 
 
-def applyFIRFilter(filter_1, filter_2, samples):
-    """Apply two FIR filters in a cascaded fashion, and return each stage."""
+def applyFIRFilters(filter_1, filter_2, samples):
+    """Pass data through two cascaded FIR filters and return the result after each filter"""
+
     half_freq_filtered = lfilter(filter_1, 1, samples)
     full_freq_filtered = lfilter(filter_2, 1, half_freq_filtered)
+
     return half_freq_filtered, full_freq_filtered
+
+
+
+#
+# Noise Power (variance) calculations
+#
+def calculateVariance(data):
+    """Calculates and returns the variance of a signal"""
+
+    # Calculate the variance of the signal X using: variance = E[X^2] - E[X]^2
+    expected_data_power = sum((np.square(data)))/len(data)  # Calculate E[X^2]
+    power_of_expected_data = np.square(sum(data)/len(data))  # Calculate E[X]^2
+    variance_data = expected_data_power - power_of_expected_data  # Calculate the variance of the data
+
+    return variance_data
+
+
+
+def calculateNoiseVariance(data, filtered_data):
+    """"Calculate the variance of the noise by comparing the filtered and unfiltered data. The variance of the noise
+    is approximated as the variance of the signal removed by the filter"""
+
+    # Turn data arrays into numpy arrays so that mathematical operations can be performed
+    np_data = np.array(data)
+    np_filtered_data = np.array(filtered_data)
+
+    # Calculate the variance of the removed noise by finding the variances of the filtered and unfiltered data
+    data_variance = calculateVariance(np_data) # Calculate the variance of the unfiltered data
+    filtered_data_variance = calculateVariance(np_filtered_data) # Calculat the variance of the filtered data
+    noise_data_variance = data_variance - filtered_data_variance # Calculate the variance of the removed noise
+
+    return noise_data_variance
 
 
 
@@ -319,7 +361,8 @@ def main():
 
     # Define filter and data parameters
     sample_rate = 1024  # Sample rate of data (Hz)
-    cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
+    #cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
+    cutoff = [np.pi/2, np.pi/2]
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
     optimal_gains = [1, 0, 1]
     freq_gains = [1, 1, 0, 1, 1]
@@ -331,7 +374,8 @@ def main():
     base_freq, base_freq_data = calcFreqSpectrum(samples, sample_rate) # Calculate the frequency spectrum of the data
 
     # Create IIR Notch filters and use them to filter the ECG data
-    notch_num_1, notch_denom_1, notch_num_2, notch_denom_2 = createIIRNotchFilters(cutoff[0], cutoff[1], notch_width, sample_rate) # Calculate notch filter coefficents
+    notch_num_1, notch_denom_1 = createIIRNotchFilter(cutoff[0], notch_width, sample_rate) # Calculate the first notch filter's coefficents
+    notch_num_2, notch_denom_2 = createIIRNotchFilter(cutoff[1], notch_width, sample_rate) # Calculate the second notch filter's coefficents
     half_notched_samples, notched_samples = applyIIRNotchFilters(notch_num_1, notch_denom_1, notch_num_2, notch_denom_2, samples) # Apply cascaded notch filters to data
     notch_time = getTimeData(sample_rate, len(notched_samples)) # Create a time array based on notch filtered data
     notch_frequency, notch_freq_data = calcFreqSpectrum(notched_samples, sample_rate) # Calculate frequency of the IIR filtered ECG data
@@ -339,17 +383,17 @@ def main():
 
     # Create and apply FIR filters to data
     window_filter_1, window_filter_2 = createWindowFilter(cutoff, sample_rate, notch_width, num_FIR_taps) # Calculate window filter coefficents
-    half_windowed_samples, full_windowed_samples = applyFIRFilter(window_filter_1, window_filter_2, samples) # Apply window filter to data
+    half_windowed_samples, full_windowed_samples = applyFIRFilters(window_filter_1, window_filter_2, samples) # Apply window filter to data
     win_time = getTimeData(sample_rate, len(full_windowed_samples)) # Create a time array based on window filtered data
     win_frequency, win_freq_data = calcFreqSpectrum(full_windowed_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
 
     optimal_filter_1, optimal_filter_2 = createOptimalFilter(cutoff, sample_rate, notch_width, optimal_gains, num_FIR_taps)
-    half_optimal_samples, full_optimal_samples = applyFIRFilter(optimal_filter_1, optimal_filter_2, samples)
+    half_optimal_samples, full_optimal_samples = applyFIRFilters(optimal_filter_1, optimal_filter_2, samples)
     opt_time = getTimeData(sample_rate, len(full_optimal_samples)) # Create a time array based on optimal filtered data
     opt_frequency, opt_freq_data = calcFreqSpectrum(full_optimal_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
     
     freq_sampling_filter_1, freq_sampling_filter_2  = createFreqSamplingFilter(cutoff, sample_rate, notch_width, freq_gains, num_FIR_taps)
-    half_freq_samples, full_freq_samples = applyFIRFilter(freq_sampling_filter_1, freq_sampling_filter_2, samples)
+    half_freq_samples, full_freq_samples = applyFIRFilters(freq_sampling_filter_1, freq_sampling_filter_2, samples)
     freq_sampling_time = getTimeData(sample_rate, len(full_freq_samples)) # Create a time array based on optimal filtered data
     freq_s_frequency, freq_s_freq_data = calcFreqSpectrum(full_freq_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
 
@@ -383,25 +427,25 @@ def main():
                FrequencySamplingECG, FrequencySamplingECGSpectrum, FrequencySamplingFilterResponse] # The figures to save, which must be in the same order as figure_names
     saveFigures(figures, figures_filename, figure_names) # Save the figures to an output folder in the current directory
 
-    # Calculate the variance of data
+    # Calculate the variance of IIR filtered data
     notched_noise_variance = calculateNoiseVariance(samples, notched_samples)  # Calculate the variance of the noise removed by the IIR notch filters
     first_notched_noise_variance = calculateNoiseVariance(samples, half_notched_samples)  # Calculate the variance of the noise removed by the first IIR notch filter
     second_notched_noise_variance = calculateNoiseVariance(half_notched_samples, notched_samples)  # Calculate the variance of the noise removed by the second IIR notch filter
 
+    # Calculate the variance of window filtered data
     window_noise_variance = calculateNoiseVariance(samples, full_windowed_samples)  # Calculate the variance of the noise removed by the 
     first_window_noise_variance = calculateNoiseVariance(samples, half_windowed_samples)  # Calculate the variance of the noise removed by the 
     second_window_noise_variance = calculateNoiseVariance(half_windowed_samples, full_windowed_samples)  # Calculate the variance of the noise removed by the 
 
+    # Calculate the variance of optimal filtered data
     optimal_noise_variance = calculateNoiseVariance(samples, full_optimal_samples)  # Calculate the variance of the noise removed by the 
     first_optimal_noise_variance = calculateNoiseVariance(samples, half_optimal_samples)  # Calculate the variance of the noise removed by the 
     second_optimal_noise_variance = calculateNoiseVariance(half_optimal_samples, full_optimal_samples)  # Calculate the variance of the noise removed by the 
 
+    # Calculate the variance of frequency sampling filtered data
     freq_sampling_noise_variance = calculateNoiseVariance(samples, full_freq_samples)  # Calculate the variance of the noise removed by the 
     first_freq_sampling_noise_variance = calculateNoiseVariance(samples, half_freq_samples)  # Calculate the variance of the noise removed by the 
     second_freq_sampling_noise_variance = calculateNoiseVariance(half_freq_samples, full_freq_samples)  # Calculate the variance of the noise removed by the
-
-
-
 
     # Save noise power to a .txt file
     noise_power_data = {'IIR notch filters': notched_noise_variance,
@@ -418,9 +462,9 @@ def main():
                         'second frequency sampling filter': second_freq_sampling_noise_variance
                         }  # Create a dictionary of the filter name and its noise power
     saveNoisePowerData(noise_power_data, noise_power_output_filename)  # Save the data about each filter to a file
+
     #plt.show()
     
-
 
 
 # Run program if called

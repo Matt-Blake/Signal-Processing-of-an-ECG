@@ -89,7 +89,8 @@ def plotIIRNotchFilterResponse(numuerator, denominator, f_samp):
     plt.xlabel("Frequency (Hz)")
 
     # Plot magnitude response
-    IIR_ax1.plot(freq, 20 * np.log10(abs(response))) # Plot magnitude in dB vs Hz
+    #IIR_ax1.plot(freq, 20 * np.log10(abs(response))) # Plot magnitude in dB vs Hz
+    IIR_ax1.plot(freq, 20 * abs(response))  # Plot magnitude Hz
     IIR_ax1.set_ylabel("Amplitude (dB)")
     IIR_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
