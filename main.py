@@ -126,9 +126,8 @@ def calculateGainFactor(numerator, denominator, passband_freq, sampling_freq):
     # Calculate gain factor
     gain_factor = denominator_sum/numerator_sum # At unity gain: gain_factor * numerator_sum/denominator_sum = 1
     gain_factor_real = np.real(gain_factor) # Take the real component of the gain factor
-    
-    return gain_factor_real
 
+    return gain_factor_real
 
 
 
@@ -168,7 +167,7 @@ def combineFilters(numerator_1, denominator_1, numerator_2, denominator_2):
 # FIR filter functions
 #
 def createWindowFilter(notches, sample_rate, notch_width, num_taps):
-    """Compute and return the bandstop  window filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
+    """Compute and return the bandstop window filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
 
     window = ('kaiser', 2)
     f1, f2 = notches
@@ -191,7 +190,6 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains, num_taps):
     width = notch_width / 1.0 #One sided 3dB bandwidth, in Hz
     #gain = np.power(10, np.array(gains)/20)
     weight = [1, 0.1, 1]
-    
 
     band_1= [0,  f1 - width, f1 - 1, f1 + 1, f1 + width, sample_rate / 2] #Pad the stop band as the method doesnt convege well otherwise
     band_2= [0, f2 - width, f2 - 1, f2 + 1, f2 + width, sample_rate / 2]
@@ -361,8 +359,8 @@ def main():
 
     # Define filter and data parameters
     sample_rate = 1024  # Sample rate of data (Hz)
-    #cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
-    cutoff = [np.pi/2, np.pi/2]
+    #cutoff = [256, 256]
+    cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
     optimal_gains = [1, 0, 1]
     freq_gains = [1, 1, 0, 1, 1]
