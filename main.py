@@ -359,7 +359,6 @@ def main():
 
     # Define filter and data parameters
     sample_rate = 1024  # Sample rate of data (Hz)
-    #cutoff = [256, 256]
     cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
     optimal_gains = [1, 0, 1]
