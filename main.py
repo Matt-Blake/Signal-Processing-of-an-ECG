@@ -289,18 +289,19 @@ def main():
     notch_frequency, notch_freq_data = calcFreqSpectrum(notched_samples, sample_rate) # Calculate frequency of the IIR filtered ECG data
     notched_numerator, notched_denominator = combineFilters(notch_num_1, notch_denom_1, notch_num_2, notch_denom_2)  # Combine the two IIR notch filters
 
-    # Create and apply FIR filters to data
+    # Create FIR window filters and use them to filter the ECG data
     window_filter = createWindowFilter(cutoff, sample_rate, notch_width) # Calculate window filter coefficents
     windowed_samples = convolve(samples, window_filter) # Apply window filter to data
     win_time = getTimeData(sample_rate, len(windowed_samples)) # Create a time array based on window filtered data
     win_frequency, win_freq_data = calcFreqSpectrum(windowed_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
 
+    # Create FIR window filters and use them to filter the ECG data
     optimal_filter = createOptimalFilter(cutoff, sample_rate, notch_width, optimal_gains)
     optimal_samples = convolve(samples, optimal_filter)
     opt_time = getTimeData(sample_rate, len(optimal_samples)) # Create a time array based on optimal filtered data
     opt_frequency, opt_freq_data = calcFreqSpectrum(optimal_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
-    
-    
+
+    # Create FIR window filters and use them to filter the ECG data
     freq_sampling_filter = createFreqSamplingFilter(cutoff, sample_rate, notch_width, freq_gains)
     freq_sampling_samples = convolve(samples, freq_sampling_filter)
     freq_sampling_time = getTimeData(sample_rate, len(freq_sampling_samples)) # Create a time array based on optimal filtered data
@@ -315,18 +316,18 @@ def main():
     IIRNotchECGSpectrum = plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data) # Plot the frequency spectrum of the IIR notch filtered ECG data
     IIRNotchFilterResponse = plotIIRNotchFilterResponse(notched_numerator, notched_denominator, sample_rate) # Plot the frequency response of the notch filter
 
-    # # Plot window filtered data
+    # Plot window filtered data
     WindowedECG = plotWindowedECG(windowed_samples, win_time) # Plot a time domain graph of the window filtered ECG data
     WindowedECGSpectrum = plotWindowedECGSpectrum(win_frequency, win_freq_data) # Plot the frequency spectrum of the window filtered ECG data
     WindowFilterResponse = plotWindowFilterResponse(window_filter, sample_rate) # Plot the frequency response of the window filter
 
-    #Plot optimal filtered data
+    # Plot optimal filtered data
     OptimalECG = plotOptimalECG(optimal_samples, opt_time) # Plot a time domain graph of the window filtered ECG data
     OptimalECGSpectrum = plotOptimalECGSpectrum(opt_frequency, opt_freq_data) # Plot the frequency spectrum of the window filtered ECG data
     OptimalFilterResponse = plotOptimalFilterResponse(optimal_filter, sample_rate) # Plot the frequency response of the window filter
 
     #Plot Frequency Sampling filtered data
-    FrequencySamplingECG = plotFrequencySampledECG(optimal_samples, opt_time) # Plot a time domain graph of the window filtered ECG data
+    FrequencySamplingECG = plotFrequencySampledECG(optimal_samples, freq_sampling_time) # Plot a time domain graph of the window filtered ECG data
     FrequencySamplingECGSpectrum = plotFrequencySampledECGSpectrum(freq_s_frequency, freq_s_freq_data) # Plot the frequency spectrum of the window filtered ECG data
     FrequencySamplingFilterResponse = plotFrequencySampledFilterResponse(freq_sampling_filter, sample_rate) # Plot the frequency response of the window filter
 
