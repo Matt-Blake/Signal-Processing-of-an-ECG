@@ -166,10 +166,9 @@ def combineFilters(numerator_1, denominator_1, numerator_2, denominator_2):
 #
 # FIR Filter functions
 #
-def createWindowFilter(notches, sample_rate, notch_width):
+def createWindowFilter(notches, sample_rate, notch_width, num_taps):
     """Compute and return the bandstop  window filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
 
-    NUM_TAPS = 399 #Max number of taps allowed
     window = ('kaiser', 4)
     f1, f2 = notches
     width = notch_width / 1.3 #One sided 3dB bandwidth, in Hz
