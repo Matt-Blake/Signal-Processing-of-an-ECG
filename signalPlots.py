@@ -12,6 +12,7 @@
 from scipy.signal import freqz, lfilter, firwin, remez, firwin2, convolve
 from scipy.fft import fft
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 
 
@@ -49,6 +50,68 @@ def plotECGSpectrum(frequency, frequency_data):
 #
 # IIR Notch Plots
 #
+def plotIIRPoleZero(cutoffs, notch_width, f_samp):
+    """Plot a pole-zero diagram of an IIR notch filter"""
+
+    # Define unit circle parameters
+    circle_centre = (0, 0)  # The x and y coordinates for the unit circle to be centre at
+    circle_radius = 1  # The unit circle has a radius of 1 by definition
+
+    # Create figure
+    circle_fig, axis = plt.subplots(figsize=(8, 8))  # Create plot
+    plt.xlim([circle_centre[0] - 1, circle_centre[0] + 1])
+    plt.ylim([circle_centre[1] - 1, circle_centre[1] + 1])
+
+    # Define pole/zero magnitudes
+    zeros_magnitude = 1  # Place the zeros on the unit circle for maximum attenuation
+    poles_magnitude = 1 - np.pi * (notch_width/f_samp)  # Calculate the optimal magnitude for the pole pairs
+
+    # Create real and imaginary axis on graph
+    real_axis = plt.Line2D([circle_centre[0] - 2, circle_centre[0] + 2], [0, 0], color='black')
+    imag_axis = plt.Line2D([0, 0], [[circle_centre[1] - 2, circle_centre[1] + 2]], color='black')
+
+    # Plot unit circle
+    circle = plt.Circle(circle_centre, circle_radius, color ='black', fill=False, label='Unit circle') # Create circle
+    axis = circle_fig.gca() # Create plot axis
+    axis.add_artist(circle) # Add unit circle to figure
+    axis.add_artist(real_axis)
+    axis.add_artist(imag_axis)
+
+    # Plot poles and zeros
+    for cutoff in cutoffs: # Iterate through each cutoff frequency
+
+        # Calculate position of poles/zeros
+        angle = 2 * np.pi * cutoff/f_samp # Calculate the pole/zero angle for cutoff frequency
+        zero_x_postion = zeros_magnitude * np.cos(angle) # Calculate zero position in real (x) axis
+        zero_y_postion = zeros_magnitude * np.sin(angle) # Calculate zero position in imaginary (y) axis
+        pole_x_postion = poles_magnitude * np.cos(angle) # Calculate pole position in real (x) axis
+        pole_y_postion = poles_magnitude * np.sin(angle) # Calculate pole position in imaginary (y) axis
+
+        # Plot lines between the origin and poles/zeros
+        zero_line = plt.Line2D([circle_centre[0], zero_x_postion], [circle_centre[1], zero_y_postion], color='grey', linestyle='--')
+        conjugate_zero_line = plt.Line2D([circle_centre[0], zero_x_postion], [circle_centre[1], -zero_y_postion], color='grey', linestyle='--')
+        axis.add_artist(zero_line)
+        axis.add_artist(conjugate_zero_line)
+
+        # Plot conjugate pairs of poles and zeros
+        axis.plot([pole_x_postion], [pole_y_postion], marker='x', markersize=8, markeredgewidth=2, color='red', label='pole')
+        axis.plot([pole_x_postion], [-pole_y_postion], marker='x', markersize=8, markeredgewidth=2, color='red', label='pole')
+        axis.plot([zero_x_postion], [zero_y_postion], marker='o', color='blue', label='zero')
+        axis.plot([zero_x_postion], [-zero_y_postion], marker='o', color='blue', label='zero')
+
+    # Label figure
+    plt.xlabel('Real{Z}')
+    plt.ylabel('Imag{Z}')
+
+    # Create legend
+    zero_patch = mpatches.Patch(color='blue', hatch='o', label='Zeros')
+    pole_patch = mpatches.Patch(color='red', hatch='x', label='Poles')
+    plt.legend(handles=[zero_patch, pole_patch, circle], loc='upper left')
+
+    return circle_fig
+
+
+
 def plotIIRNotchECG(samples, time):
     """Plot a time domain graph of the IIR notch filtered ECG data"""
 
@@ -158,7 +221,9 @@ def plotWindowFilterResponse(filter_array, f_samp):
      return WindowFilterResponse
 
 
+#
 #Optimal filter plots
+#
 def plotOptimalECG(samples, time):
     """Plot a time domain graph of the window filtered ECG data"""
 
@@ -212,8 +277,9 @@ def plotOptimalFilterResponse(filter_array, f_samp):
 
 
 
-
-#Frequency Sampling filter plots
+#
+#Frequency sampling filter plots
+#
 def plotFrequencySampledECG(samples, time):
     """Plot a time domain graph of the Frequency Sampling filtered ECG data"""
 
@@ -264,4 +330,3 @@ def plotFrequencySampledFilterResponse(filter_array, f_samp):
      freq_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
      return FreqFilterResponse
-
