@@ -1,6 +1,6 @@
-The mean power removed by the IIR notch filters is 22348.7 pW
-The mean power removed by the first IIR notch filter is 4901.2 pW
-The mean power removed by the second IIR notch filter is 17447.4 pW
+The mean power removed by the IIR notch filters is -3239549.1-14555946.7j pW
+The mean power removed by the first IIR notch filter is -3208638.8-2722943.2j pW
+The mean power removed by the second IIR notch filter is -30910.3-11833003.6j pW
 The mean power removed by the FIR Window filters is 30292.6 pW
 The mean power removed by the first window filter is 9457.8 pW
 The mean power removed by the second window filter is 20837.9 pW

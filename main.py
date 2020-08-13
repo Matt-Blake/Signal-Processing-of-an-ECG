@@ -24,7 +24,6 @@ import shutil
 from signalPlots import *
 
 
-
 # Functions
 
 #
@@ -113,6 +112,9 @@ def calculateGainFactor(numerator, denominator, passband_freq, sampling_freq):
     denominator_sum = 0
 
     # Calculate the value of the numerator and denominator by iterating through each tap
+    exp_array = [1, np.exp(1j * 2 * np.pi * passband_freq), np.exp(2j * 2 * np.pi * passband_freq)]
+    #numerator_sum = np.dot(numerator, exp_array)
+    #denominator_sum = np.dot(denominator, exp_array)
     for delay_index in range(len(numerator)):
 
         # Calculate the value of the numerator at tap
@@ -126,8 +128,7 @@ def calculateGainFactor(numerator, denominator, passband_freq, sampling_freq):
     # Calculate gain factor. At unity gain: gain_factor * numerator_sum/denominator_sum = 1
     gain_factor = denominator_sum/numerator_sum
 
-    #return gain_factor
-    return 1
+    return gain_factor
 
 
 
@@ -138,8 +139,8 @@ def createIIRNotchFilter(notch_freq, notch_width, sample_rate):
     gain_factor = calculateGainFactor(numerator, denominator, 10, sample_rate) # Calculate gain factors needed to get unity gain in passband
     normalised_numerator = np.array(numerator) * gain_factor  # Normalise passband of filters to unity gain
 
+    #return normalised_numerator, denominator
     return normalised_numerator, denominator
-
 
 
 def applyIIRNotchFilters(numerator_1, denominator_1, numerator_2, denominator_2, data):
@@ -361,8 +362,7 @@ def main():
     notch_time = getTimeData(sample_rate, len(notched_samples)) # Create a time array based on notch filtered data
     notch_frequency, notch_freq_data = calcFreqSpectrum(notched_samples, sample_rate) # Calculate frequency of the IIR filtered ECG data
     notched_numerator, notched_denominator = combineFilters(notch_num_1, notch_denom_1, notch_num_2, notch_denom_2)  # Combine the two IIR notch filters
-    print(notch_num_2)
-    print(notch_denom_2)
+
     # Create and apply FIR filters to data
     window_filter_1, window_filter_2, window_filter_overall = createWindowFilter(cutoff, sample_rate, notch_width, num_FIR_taps) # Calculate window filter coefficents
     half_windowed_samples, full_windowed_samples, overall_windowed_samples = applyFIRFilters(window_filter_1, window_filter_2, window_filter_overall, samples) # Apply window filter to data

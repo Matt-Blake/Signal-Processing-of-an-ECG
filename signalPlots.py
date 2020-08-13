@@ -9,12 +9,21 @@
     Last Modified: 07/08/2020
 """
 
+# Imported libraries
 from scipy.signal import freqz, lfilter, firwin, remez, firwin2, convolve
 from scipy.fft import fft
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 
+
+# Global variables
+TIME_LINE_WIDTH = 0.5 # The linewidth of the time domain plots
+SPECTRUM_LINE_WIDTH = 0.2 # The linewidth of the signal spectrum plots
+FILTER_LINE_WIDTH = 1.7 # The linewidth of filter response plots
+
+
+# Functions
 
 #
 # Unfiltered Plots
@@ -23,7 +32,7 @@ def plotECG(samples, time):
     """Plot a time domain graph of the ECG data"""
 
     ECG = plt.figure()
-    plt.plot(time, samples)
+    plt.plot(time, samples, linewidth=TIME_LINE_WIDTH)
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude (µV)")
     plt.suptitle("Time domain ECG signal")
@@ -37,7 +46,7 @@ def plotECGSpectrum(frequency, frequency_data):
     """Calculate and plot the frequency spectrum of the ECG"""
 
     ECGSpectrum = plt.figure()
-    plt.plot(frequency, 20 * np.log10(abs(frequency_data)))
+    plt.plot(frequency, 20 * np.log10(abs(frequency_data)), linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the ECG signal")
@@ -116,7 +125,7 @@ def plotIIRNotchECG(samples, time):
     """Plot a time domain graph of the IIR notch filtered ECG data"""
 
     IIRNotchECG = plt.figure()
-    plt.plot(time, samples)
+    plt.plot(time, samples, linewidth=TIME_LINE_WIDTH)
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude (µV)")
     plt.suptitle("Time domain IIR Notch Filtered ECG signal")
@@ -130,7 +139,7 @@ def plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data):
     """Calculate and plot the frequency spectrum of the ECG after filtering with an IIR notch filter"""
 
     IIRNotchECGSpectrum = plt.figure()
-    plt.plot(notch_frequency, 20 * np.log10(abs(notch_freq_data)))
+    plt.plot(notch_frequency, 20 * np.log10(abs(notch_freq_data)), linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the IIR Notch Filtered ECG signal")
@@ -153,12 +162,12 @@ def plotIIRNotchFilterResponse(numuerator, denominator, f_samp):
 
     # Plot magnitude response
     #IIR_ax1.plot(freq, 20 * np.log10(abs(response))) # Plot magnitude in dB vs Hz
-    IIR_ax1.plot(freq, 20 * abs(response))  # Plot magnitude Hz
+    IIR_ax1.plot(freq, abs(response), linewidth=FILTER_LINE_WIDTH)  # Plot magnitude Hz
     IIR_ax1.set_ylabel("Amplitude (dB)")
     IIR_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
     # Plot phase response
-    IIR_ax2.plot(freq, np.angle(response, deg=True)) # Plot phase in dB vs degrees
+    IIR_ax2.plot(freq, np.angle(response, deg=True), linewidth=FILTER_LINE_WIDTH) # Plot phase in dB vs degrees
     IIR_ax2.set_ylabel("Phase (°)")
     IIR_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
@@ -173,7 +182,7 @@ def plotWindowedECG(samples, time):
     """Plot a time domain graph of the window filtered ECG data"""
 
     WindowedECG = plt.figure()
-    plt.plot(time, samples)
+    plt.plot(time, samples, linewidth=TIME_LINE_WIDTH)
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude (µV)")
     plt.suptitle("Time Domain Window Filtered ECG Signal")
@@ -187,7 +196,7 @@ def plotWindowedECGSpectrum(frequency, frequency_data):
     """Calculate and plot the window filtered ECG frequency spectrum"""
 
     WindowedECGSpectrum = plt.figure()
-    plt.plot(frequency, 20 * np.log10(abs(frequency_data)))
+    plt.plot(frequency, 20 * np.log10(abs(frequency_data)), linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the Window Filtered ECG Signal")
@@ -209,12 +218,12 @@ def plotWindowFilterResponse(filter_array, f_samp):
      plt.xlabel("Frequency (Hz)")
 
      # Plot magnitude response
-     window_ax1.plot(freq, 20 * np.log10(abs(response)))  # Plot magnitude in dB vs Hz
+     window_ax1.plot(freq, 20 * np.log10(abs(response)), linewidth=FILTER_LINE_WIDTH)  # Plot magnitude in dB vs Hz
      window_ax1.set_ylabel("Amplitude (dB)")
      window_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
      # Plot phase response
-     window_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)))  # Plot phase in dB vs degrees
+     window_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)), linewidth=FILTER_LINE_WIDTH)  # Plot phase in dB vs degrees
      window_ax2.set_ylabel("Phase (°)")
      window_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
@@ -228,7 +237,7 @@ def plotOptimalECG(samples, time):
     """Plot a time domain graph of the window filtered ECG data"""
 
     OptimalECG = plt.figure()
-    plt.plot(time, samples)
+    plt.plot(time, samples, linewidth=TIME_LINE_WIDTH)
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude (µV)")
     plt.suptitle("Time Domain Optimal Filtered ECG Signal")
@@ -242,7 +251,7 @@ def plotOptimalECGSpectrum(frequency, frequency_data):
     """Calculate and plot the window filtered ECG frequency spectrum"""
 
     OptimalECGSpectrum = plt.figure()
-    plt.plot(frequency, 20 * np.log10(abs(frequency_data)))
+    plt.plot(frequency, 20 * np.log10(abs(frequency_data)), linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the Optimal Filtered ECG Signal")
@@ -264,12 +273,12 @@ def plotOptimalFilterResponse(filter_array, f_samp):
      plt.xlabel("Frequency (Hz)")
 
      # Plot magnitude response
-     optimal_ax1.plot(freq, 20 * np.log10(abs(response)))  # Plot magnitude in dB vs Hz
+     optimal_ax1.plot(freq, 20 * np.log10(abs(response)), linewidth=FILTER_LINE_WIDTH)  # Plot magnitude in dB vs Hz
      optimal_ax1.set_ylabel("Amplitude (dB)")
      optimal_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
      # Plot phase response
-     optimal_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)))  # Plot phase in dB vs degrees
+     optimal_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)), linewidth=FILTER_LINE_WIDTH)  # Plot phase in dB vs degrees
      optimal_ax2.set_ylabel("Phase (°)")
      optimal_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
@@ -284,7 +293,7 @@ def plotFrequencySampledECG(samples, time):
     """Plot a time domain graph of the Frequency Sampling filtered ECG data"""
 
     freqSampledECG = plt.figure()
-    plt.plot(time, samples)
+    plt.plot(time, samples, linewidth=TIME_LINE_WIDTH)
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude (µV)")
     plt.suptitle("Time Domain Frequency Sampling Filtered ECG Signal")
@@ -298,7 +307,7 @@ def plotFrequencySampledECGSpectrum(frequency, frequency_data):
     """Calculate and plot the Frequency Sampling filtered ECG frequency spectrum"""
 
     FreqECGSpectrum = plt.figure()
-    plt.plot(frequency, 20 * np.log10(abs(frequency_data)))
+    plt.plot(frequency, 20 * np.log10(abs(frequency_data)), linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the Frequency Sampling Filtered ECG Signal")
@@ -320,12 +329,12 @@ def plotFrequencySampledFilterResponse(filter_array, f_samp):
      plt.xlabel("Frequency (Hz)")
 
      # Plot magnitude response
-     freq_ax1.plot(freq, 20 * np.log10(abs(response)), linewidth=0.2)  # Plot magnitude in dB vs Hz
+     freq_ax1.plot(freq, 20 * np.log10(abs(response)), linewidth=FILTER_LINE_WIDTH)  # Plot magnitude in dB vs Hz
      freq_ax1.set_ylabel("Amplitude (dB)")
      freq_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
      # Plot phase response
-     freq_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)))  # Plot phase in dB vs degrees
+     freq_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)), linewidth=FILTER_LINE_WIDTH)  # Plot phase in dB vs degrees
      freq_ax2.set_ylabel("Phase (°)")
      freq_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
