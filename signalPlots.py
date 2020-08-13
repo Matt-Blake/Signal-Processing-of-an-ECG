@@ -67,7 +67,7 @@ def plotIIRPoleZero(cutoffs, notch_width, f_samp):
     circle_radius = 1  # The unit circle has a radius of 1 by definition
 
     # Create figure
-    circle_fig, axis = plt.subplots(figsize=(8, 8))  # Create plot
+    circle_fig, axis = plt.subplots(figsize=(6, 6))  # Create plot
     plt.xlim([circle_centre[0] - 1, circle_centre[0] + 1])
     plt.ylim([circle_centre[1] - 1, circle_centre[1] + 1])
 

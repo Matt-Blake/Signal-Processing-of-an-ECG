@@ -128,14 +128,15 @@ def calculateGainFactor(numerator, denominator, passband_freq):
 
 
 
-def createIIRNotchFilter(notch_freq, notch_width, sample_rate):
+def createIIRNotchFilter(notch_freq, notch_width, passband_f, sample_rate):
     """Create and return the coefficents of an IIR notch filter"""
 
     numerator, denominator = computeIIRNotchCoefficients(notch_freq, notch_width, sample_rate)  # Calculate filter coefficents
-    gain_factor = calculateGainFactor(numerator, denominator, 10) # Calculate gain factors needed to get unity gain in passband
+    gain_factor = calculateGainFactor(numerator, denominator, passband_f) # Calculate gain factors needed to get unity gain in passband
     normalised_numerator = np.array(numerator) * gain_factor  # Normalise passband of filters to unity gain
 
     return normalised_numerator, denominator
+
 
 
 def applyIIRNotchFilters(numerator_1, denominator_1, numerator_2, denominator_2, data):
@@ -342,6 +343,7 @@ def main():
     # Define filter and data parameters
     sample_rate = 1024  # Sample rate of data (Hz)
     cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
+    passband_f = [10, 10] # Passband frequencies (Hz) used to calculate the gain factor
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
     optimal_gains = [1, 0, 1]
     freq_gains = [1, 1, 0, 1, 1]
@@ -353,8 +355,8 @@ def main():
     base_freq, base_freq_data = calcFreqSpectrum(samples, sample_rate) # Calculate the frequency spectrum of the data
 
     # Create IIR Notch filters and use them to filter the ECG data
-    notch_num_1, notch_denom_1 = createIIRNotchFilter(cutoff[0], notch_width, sample_rate) # Calculate the first notch filter's coefficents
-    notch_num_2, notch_denom_2 = createIIRNotchFilter(cutoff[1], notch_width, sample_rate) # Calculate the second notch filter's coefficents
+    notch_num_1, notch_denom_1 = createIIRNotchFilter(cutoff[0], notch_width, passband_f[0], sample_rate) # Calculate the first notch filter's coefficents
+    notch_num_2, notch_denom_2 = createIIRNotchFilter(cutoff[1], notch_width, passband_f[1], sample_rate) # Calculate the second notch filter's coefficents
     half_notched_samples, notched_samples = applyIIRNotchFilters(notch_num_1, notch_denom_1, notch_num_2, notch_denom_2, samples) # Apply cascaded notch filters to data
     notch_time = getTimeData(sample_rate, len(notched_samples)) # Create a time array based on notch filtered data
     notch_frequency, notch_freq_data = calcFreqSpectrum(notched_samples, sample_rate) # Calculate frequency of the IIR filtered ECG data
