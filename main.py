@@ -192,7 +192,7 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains, num_taps):
 
     f1, f2 = notches
     width = notch_width / 2.0 #One sided 3dB bandwidth, in Hz - 5.0 / 1.3
-    stop = 1000 #Stop band weighting - 12
+    stop = 100000 #Stop band weighting - 12
     pass_ = 1 #Passband weighting - 1
     weight = [pass_, stop, pass_] #Isolated filter weighting
     weight_overall = [pass_, stop, pass_, stop, pass_] #Overall filter weighting
@@ -447,7 +447,7 @@ def main():
                         'second frequency sampling filter': second_freq_sampling_noise_variance
                         }  # Create a dictionary of the filter name and its noise power
     saveNoisePowerData(noise_power_data, noise_power_output_filename)  # Save the data about each filter to a file
-    #plt.show()
+    plt.show()
 
 
 
