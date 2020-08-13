@@ -110,25 +110,17 @@ def calculateGainFactor(numerator, denominator, passband_freq, sampling_freq):
     # Initalise sum of the numerator/denominator at the passband_freq
     numerator_sum = 0
     denominator_sum = 0
+    num_coefficents = len(numerator)
 
-    # Calculate the value of the numerator and denominator by iterating through each tap
-    exp_array = [1, np.exp(1j * 2 * np.pi * passband_freq), np.exp(2j * 2 * np.pi * passband_freq)]
+    # Calculate the value of the numerator and denominator
+    exp_array = [np.exp(2j * 2 * np.pi * passband_freq), np.exp(1j * 2 * np.pi * passband_freq), 1] # Array of exponentials (z terms)
     numerator_sum = np.dot(numerator, exp_array)
     denominator_sum = np.dot(denominator, exp_array)
-    #for delay_index in range(len(numerator)):
-
-        # Calculate the value of the numerator at tap
-       # numerator_coeff = numerator[delay_index] # Extract numerator tap coefficent
-        #numerator_sum += numerator_coeff * ((np.exp(1j * 2 * np.pi * angle)) ** (-delay_index)) # Add transfer function value to numerator sum
-
-        # Calculate the value of the denominator at tap
-       # denominator_coeff = denominator[delay_index] # Extract denominator tap coefficent
-       # denominator_sum += denominator_coeff * ((np.exp(1j * angle)) ** (-delay_index))  # Add transfer function value to numerator sum
 
     # Calculate gain factor.
     gain_factor = denominator_sum/numerator_sum # At unity gain: gain_factor * numerator_sum/denominator_sum = 1
     real_gain_factor = np.real(gain_factor) # Take the real component of the gain factor
-
+    
     return real_gain_factor
 
 
@@ -447,7 +439,7 @@ def main():
                         'second frequency sampling filter': second_freq_sampling_noise_variance
                         }  # Create a dictionary of the filter name and its noise power
     saveNoisePowerData(noise_power_data, noise_power_output_filename)  # Save the data about each filter to a file
-    #plt.show()
+    plt.show()
 
 
 

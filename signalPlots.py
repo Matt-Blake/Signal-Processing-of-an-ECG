@@ -141,7 +141,7 @@ def plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data):
     IIRNotchECGSpectrum = plt.figure()
     plt.plot(notch_frequency, 20 * np.log(abs(notch_freq_data)), linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
-    plt.ylabel("Amplitude (dB)x")
+    plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the IIR Notch Filtered ECG signal")
     plt.xlim(notch_frequency[0], notch_frequency[-1]/2)  # Limit the x axis to locations with data points
 
