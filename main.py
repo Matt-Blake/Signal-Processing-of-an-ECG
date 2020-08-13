@@ -101,26 +101,29 @@ def computeIIRNotchCoefficients(notch_freq, notch_width, sampling_freq):
 
 
 
-def calculateGainFactor(numerator, denominator, passband_freq, sampling_freq):
+def calculateGainFactor(numerator, denominator, passband_freq):
     """Calculate and return the coefficent needed to normalise the passband gain of an IIR filter to unity"""
 
-    # Calculate passband angle
-    angle = 2 * np.pi * passband_freq/sampling_freq
+    # Initalise variables
+    num_coeff = len(numerator) # Calculate number of tap coefficents
+    numerator_sum = 0 # The sum of filter's numerator at the passband frequency
+    denominator_sum = 0 # The sum of filter's denominator at the passband frequency
 
-    # Initalise sum of the numerator/denominator at the passband_freq
-    numerator_sum = 0
-    denominator_sum = 0
-    num_coefficents = len(numerator)
+    # Calculate the value of the numerator and denominator by iterating through each tap coefficent
+    for delay_index in range(len(numerator)):
 
-    # Calculate the value of the numerator and denominator
-    exp_array = [np.exp(2j * 2 * np.pi * passband_freq), np.exp(1j * 2 * np.pi * passband_freq), 1] # Array of exponentials (z terms)
-    numerator_sum = np.dot(numerator, exp_array)
-    denominator_sum = np.dot(denominator, exp_array)
+        # Calculate the value of the numerator at tap
+        numerator_coeff = numerator[delay_index] # Extract numerator tap coefficent
+        numerator_sum += numerator_coeff * (np.exp(((num_coeff - delay_index - 1) * 1j * 2 * np.pi * passband_freq))) # Add transfer function value to numerator sum
+
+        # Calculate the value of the denominator at tap
+        denominator_coeff = denominator[delay_index] # Extract denominator tap coefficent
+        denominator_sum += denominator_coeff * (np.exp(((num_coeff - delay_index - 1) * 1j * 2 * np.pi * passband_freq)))  # Add transfer function value to numerator sum
 
     # Calculate gain factor.
     gain_factor = denominator_sum/numerator_sum # At unity gain: gain_factor * numerator_sum/denominator_sum = 1
     real_gain_factor = np.real(gain_factor) # Take the real component of the gain factor
-    
+
     return real_gain_factor
 
 
@@ -129,7 +132,7 @@ def createIIRNotchFilter(notch_freq, notch_width, sample_rate):
     """Create and return the coefficents of an IIR notch filter"""
 
     numerator, denominator = computeIIRNotchCoefficients(notch_freq, notch_width, sample_rate)  # Calculate filter coefficents
-    gain_factor = calculateGainFactor(numerator, denominator, 10, sample_rate) # Calculate gain factors needed to get unity gain in passband
+    gain_factor = calculateGainFactor(numerator, denominator, 10) # Calculate gain factors needed to get unity gain in passband
     normalised_numerator = np.array(numerator) * gain_factor  # Normalise passband of filters to unity gain
 
     return normalised_numerator, denominator
@@ -439,7 +442,7 @@ def main():
                         'second frequency sampling filter': second_freq_sampling_noise_variance
                         }  # Create a dictionary of the filter name and its noise power
     saveNoisePowerData(noise_power_data, noise_power_output_filename)  # Save the data about each filter to a file
-    plt.show()
+    #plt.show()
 
 
 
