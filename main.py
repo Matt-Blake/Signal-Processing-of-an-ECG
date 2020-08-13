@@ -170,7 +170,7 @@ def createWindowFilter(notches, sample_rate, notch_width, num_taps):
 
     window = ('kaiser', 4)
     f1, f2 = notches
-    width = notch_width / 1.3 #One sided 3dB bandwidth, in Hz
+    width = notch_width / 1.3 # One sided 3dB bandwidth, in Hz
 
     cutoff_1 = [(f1 - width), (f1 + width)]
     cutoff_2 = [(f2 - width), (f2 + width)]
@@ -187,15 +187,15 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains, num_taps):
     """Compute and return the bandstop  optimal filter arrays for the specified notches. Adjusting the window type and band width changes attenuation."""
 
     f1, f2 = notches
-    width = notch_width / 1.3 #One sided 3dB bandwidth, in Hz - 5.0 / 1.3
-    stop = 12 #Stop band weighting - 12
-    pass_ = 1 #Passband weighting - 1
-    weight = [pass_, stop, pass_] #Isolated filter weighting
-    weight_overall = [pass_, stop, pass_, stop, pass_] #Overall filter weighting
-    gains_overall = [1, 0, 1, 0, 1] #Indicates stop and passband locations in the specified bands
-    alpha = 0.59 #Minimal Spacing of notch to allow convergence
+    width = notch_width / 1.3 # One sided 3dB bandwidth, in Hz - 5.0 / 1.3
+    stop = 12 # Stop band weighting - 12
+    pass_ = 1 # Passband weighting - 1
+    weight = [pass_, stop, pass_] # Isolated filter weighting
+    weight_overall = [pass_, stop, pass_, stop, pass_] # Overall filter weighting
+    gains_overall = [1, 0, 1, 0, 1] # Indicates stop and passband locations in the specified bands
+    alpha = 0.59 # Minimal Spacing of notch to allow convergence
 
-    band_1= [0,  f1 - width, f1 - alpha, f1 + alpha, f1 + width, sample_rate / 2] #Pad the stop band as the method doesnt convege well otherwise
+    band_1= [0,  f1 - width, f1 - alpha, f1 + alpha, f1 + width, sample_rate / 2] # Pad the stop band as the method doesnt convege well otherwise
     band_2= [0, f2 - width, f2 - alpha, f2 + alpha, f2 + width, sample_rate / 2]
     bands = [0,  f1 - width, f1 - alpha, f1 + alpha, f1 + width, f2 - width, f2 - alpha, f2 + alpha, f2 + width, sample_rate / 2] 
 
