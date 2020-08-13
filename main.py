@@ -126,7 +126,8 @@ def calculateGainFactor(numerator, denominator, passband_freq, sampling_freq):
     # Calculate gain factor. At unity gain: gain_factor * numerator_sum/denominator_sum = 1
     gain_factor = denominator_sum/numerator_sum
 
-    return gain_factor
+    #return gain_factor
+    return 1
 
 
 
@@ -282,14 +283,14 @@ def createClean(filename, directory=False):
     for reading and writing if it is a file.
     Deletes a previously created file if it exists, so that a new file can be written cleanly"""
 
-    # Remove file
+    # Remove old file
     if os.path.exists(filename): # Check if an output path already exists
         if directory == True: # If a folder is to be created
             shutil.rmtree(filename) # Remove previous output folder, so the figures can be cleanly saved
         else: # If a file is to be created
             os.remove(filename) # Remove the previous file, so the file can be cleanly saved
 
-    # Create
+    # Create file
     if directory == True: # If a folder is to be created
         output = os.path.join(filename)  # The output folder for the figures to be saved
         os.mkdir(output) # Create output folder
@@ -360,7 +361,8 @@ def main():
     notch_time = getTimeData(sample_rate, len(notched_samples)) # Create a time array based on notch filtered data
     notch_frequency, notch_freq_data = calcFreqSpectrum(notched_samples, sample_rate) # Calculate frequency of the IIR filtered ECG data
     notched_numerator, notched_denominator = combineFilters(notch_num_1, notch_denom_1, notch_num_2, notch_denom_2)  # Combine the two IIR notch filters
-
+    print(notch_num_2)
+    print(notch_denom_2)
     # Create and apply FIR filters to data
     window_filter_1, window_filter_2, window_filter_overall = createWindowFilter(cutoff, sample_rate, notch_width, num_FIR_taps) # Calculate window filter coefficents
     half_windowed_samples, full_windowed_samples, overall_windowed_samples = applyFIRFilters(window_filter_1, window_filter_2, window_filter_overall, samples) # Apply window filter to data

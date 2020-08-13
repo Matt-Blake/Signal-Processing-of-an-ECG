@@ -320,7 +320,7 @@ def plotFrequencySampledFilterResponse(filter_array, f_samp):
      plt.xlabel("Frequency (Hz)")
 
      # Plot magnitude response
-     freq_ax1.plot(freq, 20 * np.log10(abs(response)))  # Plot magnitude in dB vs Hz
+     freq_ax1.plot(freq, 20 * np.log10(abs(response)), linewidth=0.2)  # Plot magnitude in dB vs Hz
      freq_ax1.set_ylabel("Amplitude (dB)")
      freq_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
