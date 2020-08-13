@@ -101,29 +101,24 @@ def computeIIRNotchCoefficients(notch_freq, notch_width, sampling_freq):
 
 
 
-def calculateGainFactor(numerator, denominator, passband_freq, sampling_freq):
+def calculateGainFactor(numerator, denominator, passband_freq):
     """Calculate and return the coefficent needed to normalise the passband gain of an IIR filter to unity"""
 
-    # Calculate passband angle
-    angle = 2 * np.pi * passband_freq/sampling_freq
+    # Initalise variables
+    num_coeff = len(numerator) # Calculate number of tap coefficents
+    numerator_sum = 0 # The sum of filter's numerator at the passband frequency
+    denominator_sum = 0 # The sum of filter's denominator at the passband frequency
 
-    # Initalise sum of the numerator/denominator at the passband_freq
-    numerator_sum = 0
-    denominator_sum = 0
-
-    # Calculate the value of the numerator and denominator by iterating through each tap
-    exp_array = [1, np.exp(1j * 2 * np.pi * passband_freq), np.exp(2j * 2 * np.pi * passband_freq)]
-    numerator_sum = np.dot(numerator, exp_array)
-    denominator_sum = np.dot(denominator, exp_array)
-    #for delay_index in range(len(numerator)):
+    # Calculate the value of the numerator and denominator by iterating through each tap coefficent
+    for delay_index in range(len(numerator)):
 
         # Calculate the value of the numerator at tap
-       # numerator_coeff = numerator[delay_index] # Extract numerator tap coefficent
-        #numerator_sum += numerator_coeff * ((np.exp(1j * 2 * np.pi * angle)) ** (-delay_index)) # Add transfer function value to numerator sum
+        numerator_coeff = numerator[delay_index] # Extract numerator tap coefficent
+        numerator_sum += numerator_coeff * (np.exp(((num_coeff - delay_index - 1) * 1j * 2 * np.pi * passband_freq))) # Add transfer function value to numerator sum
 
         # Calculate the value of the denominator at tap
-       # denominator_coeff = denominator[delay_index] # Extract denominator tap coefficent
-       # denominator_sum += denominator_coeff * ((np.exp(1j * angle)) ** (-delay_index))  # Add transfer function value to numerator sum
+        denominator_coeff = denominator[delay_index] # Extract denominator tap coefficent
+        denominator_sum += denominator_coeff * (np.exp(((num_coeff - delay_index - 1) * 1j * 2 * np.pi * passband_freq)))  # Add transfer function value to numerator sum
 
     # Calculate gain factor.
     gain_factor = denominator_sum/numerator_sum # At unity gain: gain_factor * numerator_sum/denominator_sum = 1
@@ -133,14 +128,15 @@ def calculateGainFactor(numerator, denominator, passband_freq, sampling_freq):
 
 
 
-def createIIRNotchFilter(notch_freq, notch_width, sample_rate):
+def createIIRNotchFilter(notch_freq, notch_width, passband_f, sample_rate):
     """Create and return the coefficents of an IIR notch filter"""
 
     numerator, denominator = computeIIRNotchCoefficients(notch_freq, notch_width, sample_rate)  # Calculate filter coefficents
-    gain_factor = calculateGainFactor(numerator, denominator, 10, sample_rate) # Calculate gain factors needed to get unity gain in passband
+    gain_factor = calculateGainFactor(numerator, denominator, passband_f) # Calculate gain factors needed to get unity gain in passband
     normalised_numerator = np.array(numerator) * gain_factor  # Normalise passband of filters to unity gain
 
     return normalised_numerator, denominator
+
 
 
 def applyIIRNotchFilters(numerator_1, denominator_1, numerator_2, denominator_2, data):
@@ -214,22 +210,25 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains, num_taps):
 def createFreqSamplingFilter(notches, sample_rate, notch_width, gains, num_taps):
     """Compute and return the bandstop frequency sampling filter arrays for the specified notches. Adjusting the window type and band width changes attenuation."""
 
+    # Define and computer frequency sampling filter coefficients
     f1, f2 = notches
     window_type = ('kaiser', 2.5)
-    width = notch_width / 2.0 #One sided 3dB bandwidth, in Hz
-    alpha = width - 0.01 #Added transition points to narrow the band further
+    width = notch_width / 2.0 # One sided 3dB bandwidth, in Hz
+    alpha = width - 0.01 # Added transition points to narrow the band further
     omega = width - 0.1 
     #gain = np.power(10, np.array(gains)/20.0)
-    gains = [1, 1, 0, 0, 0, 0, 0, 1, 1]
-    gains_overall = [1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1]
+    gains = [1, 1, 0, 0, 0, 0, 0, 1, 1] # The passband/stopband gains for each filter
+    gains_overall = [1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1] # The passband/stopband gains for the cascaded filters
 
-    freq_1 = [0, f1 - width, f1 - alpha, f1 - omega, f1, f1 + omega, f1 + alpha, f1 + width, sample_rate / 2]
-    freq_2 = [0, f2 - width, f2 - alpha, f2 - omega, f2, f2 + omega, f2 + alpha, f2 + width, sample_rate / 2]
-    freq = [0, f1 - width, f1 - alpha, f1 - omega, f1, f1 + omega, f1 + alpha, f1 + width, f2 - width, f2 - alpha, f2 - omega, f2, f2 + omega, f2 + alpha, f2 + width, sample_rate / 2]
+    # Calculate array of frequency steps
+    freq_1 = [0, f1 - width, f1 - alpha, f1 - omega, f1, f1 + omega, f1 + alpha, f1 + width, sample_rate / 2] # Frequency steps for filter 1
+    freq_2 = [0, f2 - width, f2 - alpha, f2 - omega, f2, f2 + omega, f2 + alpha, f2 + width, sample_rate / 2] # Frequency steps for filter 2
+    freq = [0, f1 - width, f1 - alpha, f1 - omega, f1, f1 + omega, f1 + alpha, f1 + width, f2 - width, f2 - alpha, f2 - omega, f2, f2 + omega, f2 + alpha, f2 + width, sample_rate / 2] # Frequency steps for cascaded filter
 
-    filter_1 = firwin2(numtaps=num_taps, freq=freq_1, gain=gains, fs=sample_rate, window=window_type)
-    filter_2 = firwin2(numtaps=num_taps, freq=freq_2, gain=gains, fs=sample_rate, window=window_type)
-    filter_overall = firwin2(numtaps=num_taps, freq=freq, gain=gains_overall, fs=sample_rate, window=window_type)
+    # Create filters
+    filter_1 = firwin2(numtaps=num_taps, freq=freq_1, gain=gains, fs=sample_rate, window=window_type) # Create filter 1
+    filter_2 = firwin2(numtaps=num_taps, freq=freq_2, gain=gains, fs=sample_rate, window=window_type) # Create fitler 2
+    filter_overall = firwin2(numtaps=num_taps, freq=freq, gain=gains_overall, fs=sample_rate, window=window_type) # Create cascaded filter
     
     return filter_1, filter_2, filter_overall
 
@@ -347,6 +346,7 @@ def main():
     # Define filter and data parameters
     sample_rate = 1024  # Sample rate of data (Hz)
     cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
+    passband_f = [10, 10] # Passband frequencies (Hz) used to calculate the gain factor
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
     optimal_gains = [1, 0, 1]
     freq_gains = [1, 1, 0, 1, 1]
@@ -358,8 +358,8 @@ def main():
     base_freq, base_freq_data = calcFreqSpectrum(samples, sample_rate) # Calculate the frequency spectrum of the data
 
     # Create IIR Notch filters and use them to filter the ECG data
-    notch_num_1, notch_denom_1 = createIIRNotchFilter(cutoff[0], notch_width, sample_rate) # Calculate the first notch filter's coefficents
-    notch_num_2, notch_denom_2 = createIIRNotchFilter(cutoff[1], notch_width, sample_rate) # Calculate the second notch filter's coefficents
+    notch_num_1, notch_denom_1 = createIIRNotchFilter(cutoff[0], notch_width, passband_f[0], sample_rate) # Calculate the first notch filter's coefficents
+    notch_num_2, notch_denom_2 = createIIRNotchFilter(cutoff[1], notch_width, passband_f[1], sample_rate) # Calculate the second notch filter's coefficents
     half_notched_samples, notched_samples = applyIIRNotchFilters(notch_num_1, notch_denom_1, notch_num_2, notch_denom_2, samples) # Apply cascaded notch filters to data
     notch_time = getTimeData(sample_rate, len(notched_samples)) # Create a time array based on notch filtered data
     notch_frequency, notch_freq_data = calcFreqSpectrum(notched_samples, sample_rate) # Calculate frequency of the IIR filtered ECG data

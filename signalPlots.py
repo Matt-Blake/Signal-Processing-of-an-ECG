@@ -67,7 +67,7 @@ def plotIIRPoleZero(cutoffs, notch_width, f_samp):
     circle_radius = 1  # The unit circle has a radius of 1 by definition
 
     # Create figure
-    circle_fig, axis = plt.subplots(figsize=(8, 8))  # Create plot
+    circle_fig, axis = plt.subplots(figsize=(6, 6))  # Create plot
     plt.xlim([circle_centre[0] - 1, circle_centre[0] + 1])
     plt.ylim([circle_centre[1] - 1, circle_centre[1] + 1])
 
@@ -141,7 +141,7 @@ def plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data):
     IIRNotchECGSpectrum = plt.figure()
     plt.plot(notch_frequency, 20 * np.log(abs(notch_freq_data)), linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
-    plt.ylabel("Amplitude (dB)x")
+    plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the IIR Notch Filtered ECG signal")
     plt.xlim(notch_frequency[0], notch_frequency[-1]/2)  # Limit the x axis to locations with data points
 
