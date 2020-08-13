@@ -169,13 +169,15 @@ def combineFilters(numerator_1, denominator_1, numerator_2, denominator_2):
 def createWindowFilter(notches, sample_rate, notch_width, num_taps):
     """Compute and return the bandstop  window filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
 
-    window = ('kaiser', 4)
+    window = ('kaiser', 2.5)
     f1, f2 = notches
-    width = notch_width / 1.3 #One sided 3dB bandwidth, in Hz
+    width = notch_width / 2.0 #One sided 3dB bandwidth, in Hz
 
     cutoff_1 = [(f1 - width), (f1 + width)]
     cutoff_2 = [(f2 - width), (f2 + width)]
     cutoff = [(f1 - width), (f1 + width), (f2 - width), (f2 + width)]
+
+
     filter_1 = firwin(numtaps=num_taps, cutoff=cutoff_1, window=window, fs=sample_rate)
     filter_2 = firwin(numtaps=num_taps, cutoff=cutoff_2, window=window, fs=sample_rate)
     filter_overall =  firwin(numtaps=num_taps, cutoff=cutoff, window=window, fs=sample_rate)
@@ -188,13 +190,13 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains, num_taps):
     """Compute and return the bandstop  optimal filter arrays for the specified notches. Adjusting the window type and band width changes attenuation."""
 
     f1, f2 = notches
-    width = notch_width / 1.3 #One sided 3dB bandwidth, in Hz - 5.0 / 1.3
-    stop = 12 #Stop band weighting - 12
+    width = notch_width / 2.0 #One sided 3dB bandwidth, in Hz - 5.0 / 1.3
+    stop = 1000 #Stop band weighting - 12
     pass_ = 1 #Passband weighting - 1
     weight = [pass_, stop, pass_] #Isolated filter weighting
     weight_overall = [pass_, stop, pass_, stop, pass_] #Overall filter weighting
     gains_overall = [1, 0, 1, 0, 1] #Indicates stop and passband locations in the specified bands
-    alpha = 0.59 #Minimal Spacing of notch to allow convergence
+    alpha = 0.001 #Minimal Spacing of notch to allow convergence
 
     band_1= [0,  f1 - width, f1 - alpha, f1 + alpha, f1 + width, sample_rate / 2] #Pad the stop band as the method doesnt convege well otherwise
     band_2= [0, f2 - width, f2 - alpha, f2 + alpha, f2 + width, sample_rate / 2]
@@ -212,8 +214,8 @@ def createFreqSamplingFilter(notches, sample_rate, notch_width, gains, num_taps)
     """Compute and return the bandstop frequency sampling filter arrays for the specified notches. Adjusting the window type and band width changes attenuation."""
 
     f1, f2 = notches
-    window_type = ('kaiser', 4)
-    width = notch_width / 1.4 #One sided 3dB bandwidth, in Hz
+    window_type = ('kaiser', 2.5)
+    width = notch_width / 2.0 #One sided 3dB bandwidth, in Hz
     alpha = width - 0.01 #Added transition points to narrow the band further
     omega = width - 0.1 
     #gain = np.power(10, np.array(gains)/20.0)

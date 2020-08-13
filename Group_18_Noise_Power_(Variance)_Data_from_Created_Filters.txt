@@ -1,12 +1,12 @@
 The mean power removed by the IIR notch filters is -887024014060766060823301411462500045434888525612222251008.0 pW
 The mean power removed by the first IIR notch filter is -27983630104565450459740486238208.0 pW
 The mean power removed by the second IIR notch filter is -887024014060766060823301411462500045434888525612222251008.0 pW
-The mean power removed by the FIR Window filters is 30292.6 pW
-The mean power removed by the first window filter is 9457.8 pW
-The mean power removed by the second window filter is 20837.9 pW
-The mean power removed by the FIR Optimal filters is 15146.7 pW
-The mean power removed by the first optimal filter is -10783.4 pW
-The mean power removed by the second optimal filter is 6300.4 pW
-The mean power removed by the FIR Frequency Sampling filters is 29571.2 pW
-The mean power removed by the first frequency sampling filter is 8942.1 pW
-The mean power removed by the second frequency sampling filter is 20631.9 pW
+The mean power removed by the FIR Window filters is 29546.5 pW
+The mean power removed by the first window filter is 8848.4 pW
+The mean power removed by the second window filter is 20701.4 pW
+The mean power removed by the FIR Optimal filters is 39759.5 pW
+The mean power removed by the first optimal filter is 22558.3 pW
+The mean power removed by the second optimal filter is 23979.2 pW
+The mean power removed by the FIR Frequency Sampling filters is 29725.4 pW
+The mean power removed by the first frequency sampling filter is 8957.2 pW
+The mean power removed by the second frequency sampling filter is 20771.3 pW
