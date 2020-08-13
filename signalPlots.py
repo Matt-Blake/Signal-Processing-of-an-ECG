@@ -139,9 +139,9 @@ def plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data):
     """Calculate and plot the frequency spectrum of the ECG after filtering with an IIR notch filter"""
 
     IIRNotchECGSpectrum = plt.figure()
-    plt.plot(notch_frequency, 20 * np.log10(abs(notch_freq_data)), linewidth=SPECTRUM_LINE_WIDTH)
+    plt.plot(notch_frequency, 20 * np.log(abs(notch_freq_data)), linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
-    plt.ylabel("Amplitude (dB)")
+    plt.ylabel("Amplitude (dB)x")
     plt.suptitle("Frequency Spectrum of the IIR Notch Filtered ECG signal")
     plt.xlim(notch_frequency[0], notch_frequency[-1]/2)  # Limit the x axis to locations with data points
 
@@ -149,11 +149,11 @@ def plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data):
 
 
 
-def plotIIRNotchFilterResponse(numuerator, denominator, f_samp):
+def plotIIRNotchFilterResponse(numerator, denominator, f_samp):
     """Plot and return the frequency response (magnitude and phase) of the IIR notch filter"""
 
     # Calculate the frequency response
-    freq, response = freqz(numuerator, denominator, fs=f_samp)
+    freq, response = freqz(numerator, denominator, fs=f_samp)
 
     # Create plot
     IIRNotchFilterResponse, (IIR_ax1, IIR_ax2) = plt.subplots(2, 1)
@@ -161,8 +161,7 @@ def plotIIRNotchFilterResponse(numuerator, denominator, f_samp):
     plt.xlabel("Frequency (Hz)")
 
     # Plot magnitude response
-    #IIR_ax1.plot(freq, 20 * np.log10(abs(response))) # Plot magnitude in dB vs Hz
-    IIR_ax1.plot(freq, abs(response), linewidth=FILTER_LINE_WIDTH)  # Plot magnitude Hz
+    IIR_ax1.plot(freq, 20 * np.log(abs(response))) # Plot magnitude in dB vs Hz
     IIR_ax1.set_ylabel("Amplitude (dB)")
     IIR_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 

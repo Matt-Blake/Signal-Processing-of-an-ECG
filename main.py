@@ -113,22 +113,23 @@ def calculateGainFactor(numerator, denominator, passband_freq, sampling_freq):
 
     # Calculate the value of the numerator and denominator by iterating through each tap
     exp_array = [1, np.exp(1j * 2 * np.pi * passband_freq), np.exp(2j * 2 * np.pi * passband_freq)]
-    #numerator_sum = np.dot(numerator, exp_array)
-    #denominator_sum = np.dot(denominator, exp_array)
-    for delay_index in range(len(numerator)):
+    numerator_sum = np.dot(numerator, exp_array)
+    denominator_sum = np.dot(denominator, exp_array)
+    #for delay_index in range(len(numerator)):
 
         # Calculate the value of the numerator at tap
-        numerator_coeff = numerator[delay_index] # Extract numerator tap coefficent
-        numerator_sum += numerator_coeff * ((np.exp(1j * 2 * np.pi * angle)) ** (-delay_index)) # Add transfer function value to numerator sum
+       # numerator_coeff = numerator[delay_index] # Extract numerator tap coefficent
+        #numerator_sum += numerator_coeff * ((np.exp(1j * 2 * np.pi * angle)) ** (-delay_index)) # Add transfer function value to numerator sum
 
         # Calculate the value of the denominator at tap
-        denominator_coeff = denominator[delay_index] # Extract denominator tap coefficent
-        denominator_sum += denominator_coeff * ((np.exp(1j * angle)) ** (-delay_index))  # Add transfer function value to numerator sum
+       # denominator_coeff = denominator[delay_index] # Extract denominator tap coefficent
+       # denominator_sum += denominator_coeff * ((np.exp(1j * angle)) ** (-delay_index))  # Add transfer function value to numerator sum
 
-    # Calculate gain factor. At unity gain: gain_factor * numerator_sum/denominator_sum = 1
-    #gain_factor = denominator_sum/numerator_sum
+    # Calculate gain factor.
+    gain_factor = denominator_sum/numerator_sum # At unity gain: gain_factor * numerator_sum/denominator_sum = 1
+    real_gain_factor = np.real(gain_factor) # Take the real component of the gain factor
 
-    return gain_factor
+    return real_gain_factor
 
 
 
@@ -139,7 +140,6 @@ def createIIRNotchFilter(notch_freq, notch_width, sample_rate):
     gain_factor = calculateGainFactor(numerator, denominator, 10, sample_rate) # Calculate gain factors needed to get unity gain in passband
     normalised_numerator = np.array(numerator) * gain_factor  # Normalise passband of filters to unity gain
 
-    #return normalised_numerator, denominator
     return normalised_numerator, denominator
 
 
