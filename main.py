@@ -210,22 +210,25 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains, num_taps):
 def createFreqSamplingFilter(notches, sample_rate, notch_width, gains, num_taps):
     """Compute and return the bandstop frequency sampling filter arrays for the specified notches. Adjusting the window type and band width changes attenuation."""
 
+    # Define and computer frequency sampling filter coefficients
     f1, f2 = notches
     window_type = ('kaiser', 2.5)
-    width = notch_width / 2.0 #One sided 3dB bandwidth, in Hz
-    alpha = width - 0.01 #Added transition points to narrow the band further
+    width = notch_width / 2.0 # One sided 3dB bandwidth, in Hz
+    alpha = width - 0.01 # Added transition points to narrow the band further
     omega = width - 0.1 
     #gain = np.power(10, np.array(gains)/20.0)
-    gains = [1, 1, 0, 0, 0, 0, 0, 1, 1]
-    gains_overall = [1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1]
+    gains = [1, 1, 0, 0, 0, 0, 0, 1, 1] # The passband/stopband gains for each filter
+    gains_overall = [1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1] # The passband/stopband gains for the cascaded filters
 
-    freq_1 = [0, f1 - width, f1 - alpha, f1 - omega, f1, f1 + omega, f1 + alpha, f1 + width, sample_rate / 2]
-    freq_2 = [0, f2 - width, f2 - alpha, f2 - omega, f2, f2 + omega, f2 + alpha, f2 + width, sample_rate / 2]
-    freq = [0, f1 - width, f1 - alpha, f1 - omega, f1, f1 + omega, f1 + alpha, f1 + width, f2 - width, f2 - alpha, f2 - omega, f2, f2 + omega, f2 + alpha, f2 + width, sample_rate / 2]
+    # Calculate array of frequency steps
+    freq_1 = [0, f1 - width, f1 - alpha, f1 - omega, f1, f1 + omega, f1 + alpha, f1 + width, sample_rate / 2] # Frequency steps for filter 1
+    freq_2 = [0, f2 - width, f2 - alpha, f2 - omega, f2, f2 + omega, f2 + alpha, f2 + width, sample_rate / 2] # Frequency steps for filter 2
+    freq = [0, f1 - width, f1 - alpha, f1 - omega, f1, f1 + omega, f1 + alpha, f1 + width, f2 - width, f2 - alpha, f2 - omega, f2, f2 + omega, f2 + alpha, f2 + width, sample_rate / 2] # Frequency steps for cascaded filter
 
-    filter_1 = firwin2(numtaps=num_taps, freq=freq_1, gain=gains, fs=sample_rate, window=window_type)
-    filter_2 = firwin2(numtaps=num_taps, freq=freq_2, gain=gains, fs=sample_rate, window=window_type)
-    filter_overall = firwin2(numtaps=num_taps, freq=freq, gain=gains_overall, fs=sample_rate, window=window_type)
+    # Create filters
+    filter_1 = firwin2(numtaps=num_taps, freq=freq_1, gain=gains, fs=sample_rate, window=window_type) # Create filter 1
+    filter_2 = firwin2(numtaps=num_taps, freq=freq_2, gain=gains, fs=sample_rate, window=window_type) # Create fitler 2
+    filter_overall = firwin2(numtaps=num_taps, freq=freq, gain=gains_overall, fs=sample_rate, window=window_type) # Create cascaded filter
     
     return filter_1, filter_2, filter_overall
 
