@@ -117,17 +117,17 @@ def calculateGainFactor(numerator, denominator, passband_freq, sampling_freq):
 
         # Calculate the value of the numerator at tap
         numerator_coeff = numerator[delay_index] # Extract numerator tap coefficent
-        numerator_sum += numerator_coeff * ((np.exp(1j * angle)) ** (-delay_index)) # Add transfer function value to numerator sum
+        numerator_sum += numerator_coeff * ((np.exp(1j * 2 * np.pi * angle)) ** (-delay_index)) # Add transfer function value to numerator sum
 
         # Calculate the value of the denominator at tap
         denominator_coeff = denominator[delay_index] # Extract denominator tap coefficent
         denominator_sum += denominator_coeff * ((np.exp(1j * angle)) ** (-delay_index))  # Add transfer function value to numerator sum
 
-    # Calculate gain factor
-    gain_factor = denominator_sum/numerator_sum # At unity gain: gain_factor * numerator_sum/denominator_sum = 1
-    gain_factor_real = np.real(gain_factor) # Take the real component of the gain factor
+    # Calculate gain factor. At unity gain: gain_factor * numerator_sum/denominator_sum = 1
+    #gain_factor = denominator_sum/numerator_sum
 
-    return gain_factor_real
+    #return gain_factor
+    return 1
 
 
 
@@ -135,7 +135,7 @@ def createIIRNotchFilter(notch_freq, notch_width, sample_rate):
     """Create and return the coefficents of an IIR notch filter"""
 
     numerator, denominator = computeIIRNotchCoefficients(notch_freq, notch_width, sample_rate)  # Calculate filter coefficents
-    gain_factor = calculateGainFactor(numerator, denominator, notch_freq, sample_rate) # Calculate gain factors needed to get unity gain in passband
+    gain_factor = calculateGainFactor(numerator, denominator, 10, sample_rate) # Calculate gain factors needed to get unity gain in passband
     normalised_numerator = np.array(numerator) * gain_factor  # Normalise passband of filters to unity gain
 
     return normalised_numerator, denominator
@@ -285,14 +285,14 @@ def createClean(filename, directory=False):
     for reading and writing if it is a file.
     Deletes a previously created file if it exists, so that a new file can be written cleanly"""
 
-    # Remove file
+    # Remove old file
     if os.path.exists(filename): # Check if an output path already exists
         if directory == True: # If a folder is to be created
             shutil.rmtree(filename) # Remove previous output folder, so the figures can be cleanly saved
         else: # If a file is to be created
             os.remove(filename) # Remove the previous file, so the file can be cleanly saved
 
-    # Create
+    # Create file
     if directory == True: # If a folder is to be created
         output = os.path.join(filename)  # The output folder for the figures to be saved
         os.mkdir(output) # Create output folder
@@ -337,12 +337,11 @@ def main():
     filename = 'enel420_grp_18.txt' # Location in project where ECG data is stored
     figures_filename = 'Group_18_Figures' # Folder to save created figure images to
     noise_power_output_filename = 'Group_18_Noise_Power_(Variance)_Data_from_Created_Filters.txt' # File to save calculated noise power data
-    figure_names = ['ECG_Time_Plot.png', 'ECG_Freq_Plot.png', 'IIR_Notched_ECG_Time_Plot.png',
-                    'IIR_Notched_Freq_Plot.png',
-                    'IIR_Frequency_Response.png', 'Windowed_ECG_Time_Plot.png', 'Windowed_Freq_Plot.png',
-                    'Windowed_Frequency_Response.png',
-                    'Optimal_ECG_Time_Plot.png', 'Optimal_Freq_Plot.png', 'Optimal_Frequency_Response.png',
-                    'Freq_Sampled_ECG_Time_Plot.png', 'Freq_Sampled_Freq_Plot.png', 'Freq_Sampled_Frequency_Response.png']  # The names that each figure should be saved as
+    figure_names = ['ECG_Time_Plot.png', 'ECG_Freq_Plot.png', 'IIR_Pole_Zero_Plot.png', 'IIR_Notched_ECG_Time_Plot.png',
+                    'IIR_Notched_Freq_Plot.png', 'IIR_Frequency_Response.png', 'Windowed_ECG_Time_Plot.png',
+                    'Windowed_Freq_Plot.png', 'Windowed_Frequency_Response.png', 'Optimal_ECG_Time_Plot.png',
+                    'Optimal_Freq_Plot.png', 'Optimal_Frequency_Response.png', 'Freq_Sampled_ECG_Time_Plot.png',
+                    'Freq_Sampled_Freq_Plot.png', 'Freq_Sampled_Frequency_Response.png']  # The names that each figure should be saved as
 
     # Define filter and data parameters
     sample_rate = 1024  # Sample rate of data (Hz)
@@ -364,7 +363,8 @@ def main():
     notch_time = getTimeData(sample_rate, len(notched_samples)) # Create a time array based on notch filtered data
     notch_frequency, notch_freq_data = calcFreqSpectrum(notched_samples, sample_rate) # Calculate frequency of the IIR filtered ECG data
     notched_numerator, notched_denominator = combineFilters(notch_num_1, notch_denom_1, notch_num_2, notch_denom_2)  # Combine the two IIR notch filters
-
+    print(notch_num_2)
+    print(notch_denom_2)
     # Create and apply FIR filters to data
     window_filter_1, window_filter_2, window_filter_overall = createWindowFilter(cutoff, sample_rate, notch_width, num_FIR_taps) # Calculate window filter coefficents
     half_windowed_samples, full_windowed_samples, overall_windowed_samples = applyFIRFilters(window_filter_1, window_filter_2, window_filter_overall, samples) # Apply window filter to data
@@ -386,6 +386,7 @@ def main():
     ECGSpectrum = plotECGSpectrum(base_freq, base_freq_data) # Plot the frequency spectrum of the ECG data
 
     # Plot IIR notch filtered data
+    IIRPoleZero = plotIIRPoleZero(cutoff, notch_width, sample_rate) # Plot a pole-zero plot of the created IIR notch filter
     IIRNotchECG = plotIIRNotchECG(notched_samples, notch_time) # Plot a time domain graph of the IIR notch filtered ECG data
     IIRNotchECGSpectrum = plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data) # Plot the frequency spectrum of the IIR notch filtered ECG data
     IIRNotchFilterResponse = plotIIRNotchFilterResponse(notched_numerator, notched_denominator, sample_rate) # Plot the frequency response of the notch filter
@@ -406,8 +407,8 @@ def main():
     FrequencySamplingFilterResponse = plotFrequencySampledFilterResponse(freq_filter_overall, sample_rate) # Plot the frequency response of the window filter
 
     # Save figures
-    figures = [ECG, ECGSpectrum, IIRNotchECG, IIRNotchECGSpectrum, IIRNotchFilterResponse, WindowedECG, WindowedECGSpectrum,
-               WindowFilterResponse, OptimalECG, OptimalECGSpectrum, OptimalFilterResponse,
+    figures = [ECG, ECGSpectrum, IIRPoleZero, IIRNotchECG, IIRNotchECGSpectrum, IIRNotchFilterResponse, WindowedECG,
+               WindowedECGSpectrum, WindowFilterResponse, OptimalECG, OptimalECGSpectrum, OptimalFilterResponse,
                FrequencySamplingECG, FrequencySamplingECGSpectrum, FrequencySamplingFilterResponse] # The figures to save, which must be in the same order as figure_names
     saveFigures(figures, figures_filename, figure_names) # Save the figures to an output folder in the current directory
 
@@ -446,13 +447,10 @@ def main():
                         'second frequency sampling filter': second_freq_sampling_noise_variance
                         }  # Create a dictionary of the filter name and its noise power
     saveNoisePowerData(noise_power_data, noise_power_output_filename)  # Save the data about each filter to a file
-    plt.show()
-    
+    #plt.show()
+
 
 
 # Run program if called
 if __name__ == '__main__':
     main()
-
-
-
