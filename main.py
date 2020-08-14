@@ -172,12 +172,12 @@ def createWindowFilters(notches, sample_rate, notch_width, num_taps):
 
     cutoff_1 = [(f1 - width), (f1 + width)] #Window 1
     cutoff_2 = [(f2 - width), (f2 + width)] #Window 2
-    cutoff = [cutoff_1[0], cutoff_1[1], cutoff_2[0], cutoff_2[1]]
+    cutoff = [cutoff_1[0], cutoff_1[1], cutoff_2[0], cutoff_2[1]] #Joined windows
 
 
-    filter_1 = firwin(numtaps=num_taps, cutoff=cutoff_1, window=window, fs=sample_rate)
-    filter_2 = firwin(numtaps=num_taps, cutoff=cutoff_2, window=window, fs=sample_rate)
-    filter_overall =  firwin(numtaps=num_taps, cutoff=cutoff, window=window, fs=sample_rate)
+    filter_1 = firwin(numtaps=num_taps, cutoff=cutoff_1, window=window, fs=sample_rate) #Filter 1
+    filter_2 = firwin(numtaps=num_taps, cutoff=cutoff_2, window=window, fs=sample_rate) #Filter 2
+    filter_overall =  firwin(numtaps=num_taps, cutoff=cutoff, window=window, fs=sample_rate) #Overall filter
     
     return filter_1, filter_2, filter_overall
 
@@ -186,23 +186,23 @@ def createWindowFilters(notches, sample_rate, notch_width, num_taps):
 def createOptimalFilters(notches, sample_rate, notch_width, num_taps):
     """Compute and return the bandstop  optimal filter arrays for the specified notches. Adjusting the window type and band width changes attenuation."""
 
-    f1, f2 = notches
-    width = notch_width / 2.0 #One sided 3dB bandwidth, in Hz - 5.0 / 1.3
-    stop = 100000 #Stop band weighting - 12
-    pass_ = 1 #Passband weighting - 1
+    f1, f2 = notches #Seperate the cutoff frequencies for computation
+    width = notch_width / 2.0 #5 / 2 = 2.5Hz one sided 3dB bandwidth
+    stop = 100000 #Stop band weighting 
+    pass_ = 1 #Passband weighting 
     weight = [pass_, stop, pass_] #Isolated filter weighting
     weight_overall = [pass_, stop, pass_, stop, pass_] #Overall filter weighting
     gains = [1, 0, 1]
     gains_overall = [1, 0, 1, 0, 1] #Indicates stop and passband locations in the specified bands
-    alpha = 0.001 #Minimal Spacing of notch to allow convergence
+    alpha = 0.001 #Minimal Spacing of stop band notch to allow convergence
 
-    band_1= [0,  f1 - width, f1 - alpha, f1 + alpha, f1 + width, sample_rate / 2] #Pad the stop band as the method doesnt convege well otherwise
+    band_1= [0,  f1 - width, f1 - alpha, f1 + alpha, f1 + width, sample_rate / 2] #Pad the stop band as the method doesnt converge well otherwise
     band_2= [0, f2 - width, f2 - alpha, f2 + alpha, f2 + width, sample_rate / 2]
-    bands = [0,  f1 - width, f1 - alpha, f1 + alpha, f1 + width, f2 - width, f2 - alpha, f2 + alpha, f2 + width, sample_rate / 2] 
+    bands = [0,  f1 - width, f1 - alpha, f1 + alpha, f1 + width, f2 - width, f2 - alpha, f2 + alpha, f2 + width, sample_rate / 2] #Overall filter bands
 
-    filter_1 = remez(numtaps=num_taps, bands=band_1, desired=gains, fs=sample_rate, weight=weight)
-    filter_2 = remez(numtaps=num_taps, bands=band_2, desired=gains, fs=sample_rate, weight=weight)
-    filter_overall = remez(numtaps=num_taps, bands=bands, desired=gains_overall, fs=sample_rate, weight=weight_overall)
+    filter_1 = remez(numtaps=num_taps, bands=band_1, desired=gains, fs=sample_rate, weight=weight) #Filter 1
+    filter_2 = remez(numtaps=num_taps, bands=band_2, desired=gains, fs=sample_rate, weight=weight) #Filter 2
+    filter_overall = remez(numtaps=num_taps, bands=bands, desired=gains_overall, fs=sample_rate, weight=weight_overall) #Overall filter
     
     return filter_1, filter_2, filter_overall
 
@@ -229,14 +229,14 @@ def createFreqSamplingFilters(notches, sample_rate, notch_width, num_taps):
     # Create filters
     filter_1 = firwin2(numtaps=num_taps, freq=freq_1, gain=gains, fs=sample_rate, window=window_type) # Create filter 1
     filter_2 = firwin2(numtaps=num_taps, freq=freq_2, gain=gains, fs=sample_rate, window=window_type) # Create fitler 2
-    filter_overall = firwin2(numtaps=num_taps, freq=freq, gain=gains_overall, fs=sample_rate, window=window_type) # Create cascaded filter
+    filter_overall = firwin2(numtaps=num_taps, freq=freq, gain=gains_overall, fs=sample_rate, window=window_type) # Create overall filter
     
     return filter_1, filter_2, filter_overall
 
 
 
 def applyFIRFilters(filter_1, filter_2, filter_overall, samples):
-    """Pass data through two cascaded FIR filters and return the result after each filter"""
+    """Pass data through two cascaded FIR filters, and a single overall filter and return the result after each filter"""
 
     half_filtered = lfilter(filter_1, 1, samples)
     full_filtered = lfilter(filter_2, 1, half_filtered)
@@ -396,14 +396,14 @@ def main():
     WindowFilterResponse = plotWindowFilterResponse(window_filter_overall, sample_rate) # Plot the frequency response of the window filter
 
     #Plot optimal filtered data
-    OptimalECG = plotOptimalECG(overall_optimal_samples, opt_time) # Plot a time domain graph of the window filtered ECG data
-    OptimalECGSpectrum = plotOptimalECGSpectrum(opt_frequency, opt_freq_data) # Plot the frequency spectrum of the window filtered ECG data
-    OptimalFilterResponse = plotOptimalFilterResponse(optimal_filter_overall, sample_rate) # Plot the frequency response of the window filter
+    OptimalECG = plotOptimalECG(overall_optimal_samples, opt_time) # Plot a time domain graph of the optimal filtered ECG data
+    OptimalECGSpectrum = plotOptimalECGSpectrum(opt_frequency, opt_freq_data) # Plot the frequency spectrum of the optimal filtered ECG data
+    OptimalFilterResponse = plotOptimalFilterResponse(optimal_filter_overall, sample_rate) # Plot the frequency response of the optimal filter
 
     #Plot Frequency Sampling filtered data
-    FrequencySamplingECG = plotFrequencySampledECG(overall_freq_samples, freq_sampling_time) # Plot a time domain graph of the window filtered ECG data
-    FrequencySamplingECGSpectrum = plotFrequencySampledECGSpectrum(freq_s_frequency, freq_s_freq_data) # Plot the frequency spectrum of the window filtered ECG data
-    FrequencySamplingFilterResponse = plotFrequencySampledFilterResponse(freq_filter_overall, sample_rate) # Plot the frequency response of the window filter
+    FrequencySamplingECG = plotFrequencySampledECG(overall_freq_samples, freq_sampling_time) # Plot a time domain graph of the frequency sampling filtered ECG data
+    FrequencySamplingECGSpectrum = plotFrequencySampledECGSpectrum(freq_s_frequency, freq_s_freq_data) # Plot the frequency spectrum of the frequency sampling filtered ECG data
+    FrequencySamplingFilterResponse = plotFrequencySampledFilterResponse(freq_filter_overall, sample_rate) # Plot the frequency response of the frequency sampling filter
 
     # Save figures
     figures = [ECG, ECGSpectrum, IIRPoleZero, IIRNotchECG, IIRNotchECGSpectrum, IIRNotchFilterResponse, WindowedECG,
