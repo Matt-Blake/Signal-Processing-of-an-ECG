@@ -15,6 +15,7 @@ from scipy.fft import fft
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
+from configFiles import *
 
 
 # Global variables
@@ -24,6 +25,34 @@ FILTER_LINE_WIDTH = 1.7 # The linewidth of filter response plots
 
 
 # Functions
+
+def calcFreqSpectrum(samples, sample_rate):
+    """Compute and return the frequency spectrum of the input samples, for the specified sample rate. Used to plot frequency spectrum."""
+
+    freq_data = np.abs(fft(samples)) # Apply FFT to data
+    freq = np.linspace(0, sample_rate, len(freq_data)) # Create an array of frequencies to be plotted
+    return freq, freq_data
+
+def getTimeData(sample_rate, num_samples):
+    """Create and return an array containing the time each sample is taken. This assumes equal sampling periods. Used to set the time axis for plotting."""
+
+    time = [] # Create an array for the results to be stored in
+    for i in range(num_samples): # Iterate through each sample
+        sample_time = i/sample_rate # Calculate the time this sample is taken
+        time.append(sample_time) # Add time to results array
+
+    return time
+
+def saveFigures(figures, figures_location, figure_names):
+    """Save a list of figures as the corresponding name"""
+
+    output_path = createClean(figures_location, True) # Create a clear output path for figures to be stored in
+
+    # Iterate through each figure saving it as the corresponding name
+    for i in range(len(figures)):
+        plt.figure(figures[i].number) # Set the figure as the current figure
+        plt.savefig(output_path + '/' + figure_names[i]) # Save the current figure
+
 
 #
 # Unfiltered Plots
