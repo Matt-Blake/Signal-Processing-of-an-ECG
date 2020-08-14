@@ -163,16 +163,16 @@ def combineFilters(numerator_1, denominator_1, numerator_2, denominator_2):
 #
 # FIR Filter functions
 #
-def createWindowFilter(notches, sample_rate, notch_width, num_taps):
+def createWindowFilters(notches, sample_rate, notch_width, num_taps):
     """Compute and return the bandstop  window filter array for the specified notches. Adjusting the window type and band width changes attenuation."""
 
-    window = ('kaiser', 2.5)
-    f1, f2 = notches
-    width = notch_width / 2.0 #One sided 3dB bandwidth, in Hz
+    window = ('kaiser', 2.5) #Define the window type
+    f1, f2 = notches #Seperate the cutoff frequencies specified
+    width = notch_width / 2.0 #5 / 2 = 2.5 Hz one sided 3dB bandwidth
 
-    cutoff_1 = [(f1 - width), (f1 + width)]
-    cutoff_2 = [(f2 - width), (f2 + width)]
-    cutoff = [(f1 - width), (f1 + width), (f2 - width), (f2 + width)]
+    cutoff_1 = [(f1 - width), (f1 + width)] #Window 1
+    cutoff_2 = [(f2 - width), (f2 + width)] #Window 2
+    cutoff = [cutoff_1[0], cutoff_1[1], cutoff_2[0], cutoff_2[1]]
 
 
     filter_1 = firwin(numtaps=num_taps, cutoff=cutoff_1, window=window, fs=sample_rate)
@@ -183,7 +183,7 @@ def createWindowFilter(notches, sample_rate, notch_width, num_taps):
 
 
 
-def createOptimalFilter(notches, sample_rate, notch_width, gains, num_taps):
+def createOptimalFilters(notches, sample_rate, notch_width, num_taps):
     """Compute and return the bandstop  optimal filter arrays for the specified notches. Adjusting the window type and band width changes attenuation."""
 
     f1, f2 = notches
@@ -192,6 +192,7 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains, num_taps):
     pass_ = 1 #Passband weighting - 1
     weight = [pass_, stop, pass_] #Isolated filter weighting
     weight_overall = [pass_, stop, pass_, stop, pass_] #Overall filter weighting
+    gains = [1, 0, 1]
     gains_overall = [1, 0, 1, 0, 1] #Indicates stop and passband locations in the specified bands
     alpha = 0.001 #Minimal Spacing of notch to allow convergence
 
@@ -207,7 +208,7 @@ def createOptimalFilter(notches, sample_rate, notch_width, gains, num_taps):
 
 
 
-def createFreqSamplingFilter(notches, sample_rate, notch_width, gains, num_taps):
+def createFreqSamplingFilters(notches, sample_rate, notch_width, num_taps):
     """Compute and return the bandstop frequency sampling filter arrays for the specified notches. Adjusting the window type and band width changes attenuation."""
 
     # Define and computer frequency sampling filter coefficients
@@ -216,14 +217,14 @@ def createFreqSamplingFilter(notches, sample_rate, notch_width, gains, num_taps)
     width = notch_width / 2.0 # One sided 3dB bandwidth, in Hz
     alpha = width - 0.01 # Added transition points to narrow the band further
     omega = width - 0.1 
-    #gain = np.power(10, np.array(gains)/20.0)
+
     gains = [1, 1, 0, 0, 0, 0, 0, 1, 1] # The passband/stopband gains for each filter
-    gains_overall = [1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1] # The passband/stopband gains for the cascaded filters
+    gains_overall = [1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1] # The passband/stopband gains for the overall filter
 
     # Calculate array of frequency steps
     freq_1 = [0, f1 - width, f1 - alpha, f1 - omega, f1, f1 + omega, f1 + alpha, f1 + width, sample_rate / 2] # Frequency steps for filter 1
     freq_2 = [0, f2 - width, f2 - alpha, f2 - omega, f2, f2 + omega, f2 + alpha, f2 + width, sample_rate / 2] # Frequency steps for filter 2
-    freq = [0, f1 - width, f1 - alpha, f1 - omega, f1, f1 + omega, f1 + alpha, f1 + width, f2 - width, f2 - alpha, f2 - omega, f2, f2 + omega, f2 + alpha, f2 + width, sample_rate / 2] # Frequency steps for cascaded filter
+    freq = [0, f1 - width, f1 - alpha, f1 - omega, f1, f1 + omega, f1 + alpha, f1 + width, f2 - width, f2 - alpha, f2 - omega, f2, f2 + omega, f2 + alpha, f2 + width, sample_rate / 2] # Frequency steps the overall filter
 
     # Create filters
     filter_1 = firwin2(numtaps=num_taps, freq=freq_1, gain=gains, fs=sample_rate, window=window_type) # Create filter 1
@@ -348,8 +349,6 @@ def main():
     cutoff = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
     passband_f = [10, 10] # Passband frequencies (Hz) used to calculate the gain factor
     notch_width = 5 # 3 dB bandwidth of the notch filters (Hz)
-    optimal_gains = [1, 0, 1]
-    freq_gains = [1, 1, 0, 1, 1]
     num_FIR_taps = 399 # The number for each FIR filter
 
     # Gather data from input files
@@ -366,17 +365,17 @@ def main():
     notched_numerator, notched_denominator = combineFilters(notch_num_1, notch_denom_1, notch_num_2, notch_denom_2)  # Combine the two IIR notch filters
 
     # Create and apply FIR filters to data
-    window_filter_1, window_filter_2, window_filter_overall = createWindowFilter(cutoff, sample_rate, notch_width, num_FIR_taps) # Calculate window filter coefficents
+    window_filter_1, window_filter_2, window_filter_overall = createWindowFilters(cutoff, sample_rate, notch_width, num_FIR_taps) # Calculate window filter coefficents
     half_windowed_samples, full_windowed_samples, overall_windowed_samples = applyFIRFilters(window_filter_1, window_filter_2, window_filter_overall, samples) # Apply window filter to data
     win_time = getTimeData(sample_rate, len(full_windowed_samples)) # Create a time array based on window filtered data
     win_frequency, win_freq_data = calcFreqSpectrum(overall_windowed_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
 
-    optimal_filter_1, optimal_filter_2, optimal_filter_overall = createOptimalFilter(cutoff, sample_rate, notch_width, optimal_gains, num_FIR_taps)
+    optimal_filter_1, optimal_filter_2, optimal_filter_overall = createOptimalFilters(cutoff, sample_rate, notch_width, num_FIR_taps)
     half_optimal_samples, full_optimal_samples, overall_optimal_samples = applyFIRFilters(optimal_filter_1, optimal_filter_2, optimal_filter_overall, samples)
     opt_time = getTimeData(sample_rate, len(full_optimal_samples)) # Create a time array based on optimal filtered data
     opt_frequency, opt_freq_data = calcFreqSpectrum(overall_optimal_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
     
-    freq_sampling_filter_1, freq_sampling_filter_2, freq_filter_overall  = createFreqSamplingFilter(cutoff, sample_rate, notch_width, freq_gains, num_FIR_taps)
+    freq_sampling_filter_1, freq_sampling_filter_2, freq_filter_overall  = createFreqSamplingFilters(cutoff, sample_rate, notch_width, num_FIR_taps)
     half_freq_samples, full_freq_samples, overall_freq_samples = applyFIRFilters(freq_sampling_filter_1, freq_sampling_filter_2, freq_filter_overall, samples)
     freq_sampling_time = getTimeData(sample_rate, len(full_freq_samples)) # Create a time array based on optimal filtered data
     freq_s_frequency, freq_s_freq_data = calcFreqSpectrum(overall_freq_samples, sample_rate) # Calculate frequency of the window IIR filtered ECG data
@@ -447,7 +446,7 @@ def main():
                         'second frequency sampling filter': second_freq_sampling_noise_variance
                         }  # Create a dictionary of the filter name and its noise power
     saveNoisePowerData(noise_power_data, noise_power_output_filename)  # Save the data about each filter to a file
-    plt.show()
+    # plt.show()
 
 
 
