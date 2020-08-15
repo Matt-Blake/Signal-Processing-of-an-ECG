@@ -195,7 +195,7 @@ def plotIIRNotchFilterResponse(numerator, denominator, f_samp):
     IIR_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
     # Plot phase response
-    IIR_ax2.plot(freq, np.angle(response, deg=True), linewidth=FILTER_LINE_WIDTH) # Plot phase in dB vs degrees
+    IIR_ax2.plot(freq, np.angle(response, deg=True), linewidth=FILTER_LINE_WIDTH)  # Plot phase in degrees vs Hz
     IIR_ax2.set_ylabel("Phase (°)")
     IIR_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
@@ -251,7 +251,7 @@ def plotWindowFilterResponse(filter_array, f_samp):
      window_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
      # Plot phase response
-     window_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)), linewidth=FILTER_LINE_WIDTH)  # Plot phase in dB vs degrees
+     window_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)), linewidth=FILTER_LINE_WIDTH)  # Plot phase in degrees vs Hz
      window_ax2.set_ylabel("Phase (°)")
      window_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
@@ -306,7 +306,7 @@ def plotOptimalFilterResponse(filter_array, f_samp):
      optimal_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
      # Plot phase response
-     optimal_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)), linewidth=FILTER_LINE_WIDTH)  # Plot phase in dB vs degrees
+     optimal_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)), linewidth=FILTER_LINE_WIDTH)  # Plot phase in degrees vs Hz
      optimal_ax2.set_ylabel("Phase (°)")
      optimal_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
@@ -362,7 +362,7 @@ def plotFrequencySampledFilterResponse(filter_array, f_samp):
      freq_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
      # Plot phase response
-     freq_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)), linewidth=FILTER_LINE_WIDTH)  # Plot phase in dB vs degrees
+     freq_ax2.plot(freq, np.unwrap(np.angle(response, deg=True)), linewidth=FILTER_LINE_WIDTH)  # Plot phase in degrees vs Hz
      freq_ax2.set_ylabel("Phase (°)")
      freq_ax2.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
