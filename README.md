@@ -1,4 +1,4 @@
-ENEL420-20S2 Assignment 1
+Signal Processing of an ECG
 
 Written by Matt Blake (58979250) and Reweti Davis (23200856)
          
