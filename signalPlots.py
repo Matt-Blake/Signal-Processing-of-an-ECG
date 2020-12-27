@@ -1,12 +1,11 @@
 """
     signalPlots.py
-    Contains all the plotting functions for ENEL420-20S2 Assignment 1,
-    including supporting functions.
+    Contains all the plotting functions for the Signal
+    Processing of an ECG program including supporting functions.
 
     Authors: Matt Blake   (58979250)
              Reweti Davis (23200856)
-             Group Number: 18
-    Last Modified: 14/08/2020
+    Last Modified: 27/12/2020
 """
 
 # Imported libraries
@@ -18,46 +17,41 @@ import numpy as np
 from configFiles import *
 
 
-# Global variables
-TIME_LINE_WIDTH = 0.5 # The linewidth of the time domain plots
-SPECTRUM_LINE_WIDTH = 0.2 # The linewidth of the signal spectrum plots
-FILTER_LINE_WIDTH = 1.7 # The linewidth of filter response plots
 
-
-# Functions
-
-def calcFreqSpectrum(samples, sample_rate):
+# General functions
+def calcFreqSpectrum(samples:list, sample_rate:float) -> tuple:
     """Compute and return the frequency spectrum of the input samples, for the specified sample rate. Used to plot frequency spectrum."""
 
     freq_data = np.abs(fft(samples)) # Apply FFT to data
     freq = np.linspace(0, sample_rate, len(freq_data)) # Create an array of frequencies to be plotted
     return freq, freq_data
 
-def getTimeData(sample_rate, num_samples):
+
+
+def getTimeData(sample_rate:float, num_samples:int) -> list:
     """Create and return an array containing the time each sample is taken. This assumes equal sampling periods. Used to set the time axis for plotting."""
 
-    time = [] # Create an array for the results to be stored in
+    time_array = []
     for i in range(num_samples): # Iterate through each sample
         sample_time = i/sample_rate # Calculate the time this sample is taken
         time.append(sample_time) # Add time to results array
 
-    return time
+    return time_array
 
-def saveFigures(figures, figures_location, figure_names):
+
+
+def saveFigures(figures:list, figures_location:str, figure_names:list):
     """Save a list of figures as the corresponding name"""
 
     output_path = createClean(figures_location, True) # Create a clear output path for figures to be stored in
-
-    # Iterate through each figure saving it as the corresponding name
-    for i in range(len(figures)):
+    for i in range(len(figures)): # Iterate through each figure saving it as the corresponding name
         plt.figure(figures[i].number) # Set the figure as the current figure
         plt.savefig(output_path + '/' + figure_names[i]) # Save the current figure
 
 
-#
+
 # Unfiltered Plots
-#
-def plotECG(samples, time):
+def plotECG(samples:list, time:list) -> plt.figure:
     """Plot a time domain graph of the ECG data"""
 
     ECG = plt.figure()
@@ -71,7 +65,7 @@ def plotECG(samples, time):
 
 
 
-def plotECGSpectrum(frequency, frequency_data):
+def plotECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
     """Calculate and plot the frequency spectrum of the ECG"""
 
     ECGSpectrum = plt.figure()
@@ -85,10 +79,8 @@ def plotECGSpectrum(frequency, frequency_data):
 
 
 
-#
 # IIR Notch Plots
-#
-def plotIIRPoleZero(cutoffs, notch_width, f_samp):
+def plotIIRPoleZero(cutoffs:list, notch_width:float, f_samp:float) -> plt.figure:
     """Plot a pole-zero diagram of an IIR notch filter"""
 
     # Define unit circle parameters
@@ -150,7 +142,7 @@ def plotIIRPoleZero(cutoffs, notch_width, f_samp):
 
 
 
-def plotIIRNotchECG(samples, time):
+def plotIIRNotchECG(samples:list, time:list) -> plt.figure:
     """Plot a time domain graph of the IIR notch filtered ECG data"""
 
     IIRNotchECG = plt.figure()
@@ -164,21 +156,21 @@ def plotIIRNotchECG(samples, time):
 
 
 
-def plotIIRNotchECGSpectrum(notch_frequency, notch_freq_data):
+def plotIIRNotchECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
     """Calculate and plot the frequency spectrum of the ECG after filtering with an IIR notch filter"""
 
     IIRNotchECGSpectrum = plt.figure()
-    plt.plot(notch_frequency, 20 * np.log(abs(notch_freq_data)), linewidth=SPECTRUM_LINE_WIDTH)
+    plt.plot(frequency, 20 * np.log(abs(frequency_data)), linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the IIR Notch Filtered ECG signal")
-    plt.xlim(notch_frequency[0], notch_frequency[-1]/2)  # Limit the x axis to locations with data points
+    plt.xlim(frequency[0], frequency[-1]/2)  # Limit the x axis to locations with data points
 
     return IIRNotchECGSpectrum
 
 
 
-def plotIIRNotchFilterResponse(numerator, denominator, f_samp):
+def plotIIRNotchFilterResponse(numerator:list, denominator:list, f_samp:float) -> plt.figure:
     """Plot and return the frequency response (magnitude and phase) of the IIR notch filter"""
 
     # Calculate the frequency response
@@ -203,10 +195,8 @@ def plotIIRNotchFilterResponse(numerator, denominator, f_samp):
 
 
 
-#
 # Window Filtered Plots
-#
-def plotWindowedECG(samples, time):
+def plotWindowedECG(samples:list, time:list) -> plt.figure:
     """Plot a time domain graph of the window filtered ECG data"""
 
     WindowedECG = plt.figure()
@@ -220,7 +210,7 @@ def plotWindowedECG(samples, time):
 
 
 
-def plotWindowedECGSpectrum(frequency, frequency_data):
+def plotWindowedECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
     """Calculate and plot the window filtered ECG frequency spectrum"""
 
     WindowedECGSpectrum = plt.figure()
@@ -234,11 +224,11 @@ def plotWindowedECGSpectrum(frequency, frequency_data):
 
 
 
-def plotWindowFilterResponse(filter_array, f_samp):
+def plotWindowFilterResponse(filter:list:, f_samp:float) -> plt.figure:
      """Plot and return the frequency response (magnitude and phase) of the window filter"""
 
      # Calculate the frequency response
-     freq, response = freqz(filter_array, fs=f_samp)
+     freq, response = freqz(filter, fs=f_samp)
 
      # Create plot
      WindowFilterResponse, (window_ax1, window_ax2) = plt.subplots(2, 1)
@@ -258,10 +248,9 @@ def plotWindowFilterResponse(filter_array, f_samp):
      return WindowFilterResponse
 
 
-#
+
 #Optimal filter plots
-#
-def plotOptimalECG(samples, time):
+def plotOptimalECG(samples:list, time:list) -> plt.figure:
     """Plot a time domain graph of the window filtered ECG data"""
 
     OptimalECG = plt.figure()
@@ -275,7 +264,7 @@ def plotOptimalECG(samples, time):
 
 
 
-def plotOptimalECGSpectrum(frequency, frequency_data):
+def plotOptimalECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
     """Calculate and plot the window filtered ECG frequency spectrum"""
 
     OptimalECGSpectrum = plt.figure()
@@ -289,11 +278,11 @@ def plotOptimalECGSpectrum(frequency, frequency_data):
 
 
 
-def plotOptimalFilterResponse(filter_array, f_samp):
+def plotOptimalFilterResponse(filter:list:, f_samp:float) -> plt.figure:
      """Plot and return the frequency response (magnitude and phase) of the window filter"""
 
      # Calculate the frequency response
-     freq, response = freqz(filter_array, fs=f_samp)
+     freq, response = freqz(filter, fs=f_samp)
 
      # Create plot
      OptimalFilterResponse, (optimal_ax1, optimal_ax2) = plt.subplots(2, 1)
@@ -314,10 +303,8 @@ def plotOptimalFilterResponse(filter_array, f_samp):
 
 
 
-#
-#Frequency sampling filter plots
-#
-def plotFrequencySampledECG(samples, time):
+# Frequency sampling filter plots
+def plotFrequencySampledECG(samples:list, time:list) -> plt.figure:
     """Plot a time domain graph of the Frequency Sampling filtered ECG data"""
 
     freqSampledECG = plt.figure()
@@ -331,7 +318,7 @@ def plotFrequencySampledECG(samples, time):
 
 
 
-def plotFrequencySampledECGSpectrum(frequency, frequency_data):
+def plotFrequencySampledECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
     """Calculate and plot the Frequency Sampling filtered ECG frequency spectrum"""
 
     FreqECGSpectrum = plt.figure()
@@ -345,11 +332,11 @@ def plotFrequencySampledECGSpectrum(frequency, frequency_data):
 
 
 
-def plotFrequencySampledFilterResponse(filter_array, f_samp):
+def plotFrequencySampledFilterResponse(filter:list:, f_samp:float) -> plt.figure:
      """Plot and return the frequency response (magnitude and phase) of the Frequency Sampling filter"""
 
      # Calculate the frequency response
-     freq, response = freqz(filter_array, fs=f_samp)
+     freq, response = freqz(filter, fs=f_samp)
 
      # Create plot
      FreqFilterResponse, (freq_ax1, freq_ax2) = plt.subplots(2, 1)

@@ -1,11 +1,11 @@
 """
-    noise.py
-    Contains all the noise variance computation functions for ENEL420-20S2 Assignment 1.
+    noise.py (Signal Processing of an ECG program)
+    Contains all the noise variance computation functions for
+    the Signal Processing of an ECG program.
 
     Authors: Matt Blake   (58979250)
              Reweti Davis (23200856)
-             Group Number: 18
-    Last Modified: 14/08/2020
+    Last Modified: 27/12/2020
 """
 
 # Imported libraries
@@ -15,9 +15,8 @@ import numpy as np
 from configFiles import *
 
 
-
-
-def saveNoisePowerData(noise_power_data, noise_power_output_filename):
+# Functions
+def saveNoisePowerData(noise_power_data:list, noise_power_output_filename:str):
     """Iterate through a list of filters, saving the noise power (variance) data"""
 
     # Create text to write and file to write to
@@ -31,10 +30,8 @@ def saveNoisePowerData(noise_power_data, noise_power_output_filename):
         outputfile.write(output_string) # Save the noise power (variance) data for that filter
 
 
-#
-# Noise Power (variance) calculations
-#
-def calculateVariance(data):
+
+def calculateVariance(data:list):
     """Calculates and returns the variance of a signal"""
 
     # Calculate the variance of the signal X using: variance = E[X^2] - E[X]^2
@@ -46,7 +43,7 @@ def calculateVariance(data):
 
 
 
-def calculateNoiseVariance(data, filtered_data):
+def calculateNoiseVariance(data:list, filtered_data:list):
     """"Calculate the variance of the noise by comparing the filtered and unfiltered data. The variance of the noise
     is approximated as the variance of the signal removed by the filter"""
 

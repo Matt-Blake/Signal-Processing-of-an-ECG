@@ -1,11 +1,11 @@
 """
-    IIR.py
-    Contains all the IIR filter computation functions for ENEL420-20S2 Assignment 1.
+    IIR.py (Signal Processing of an ECG program)
+    Contains all the IIR filter computation functions for
+    the Signal Processing of an ECG program.
 
     Authors: Matt Blake   (58979250)
              Reweti Davis (23200856)
-             Group Number: 18
-    Last Modified: 14/08/2020
+    Last Modified: 27/12/2020
 """
 
 # Imported libraries
@@ -14,10 +14,8 @@ from scipy.fft import fft
 import numpy as np
 
 
-#
-# IIR filter functions
-#
-def computeIIRNotchCoefficients(notch_freq, notch_width, sampling_freq):
+# Functions
+def computeIIRNotchCoefficients(notch_freq:list, notch_width:float, sampling_freq:float) -> tuple:
     """Compute and return the optimal notch filter coefficients, based on the notch frequency, the 3 dB width of the
     notch and the sampling frequency"""
 
@@ -47,7 +45,7 @@ def computeIIRNotchCoefficients(notch_freq, notch_width, sampling_freq):
 
 
 
-def calculateGainFactor(numerator, denominator, passband_freq):
+def calculateGainFactor(numerator:list, denominator:list, passband_freq:float) -> float:
     """Calculate and return the coefficent needed to normalise the passband gain of an IIR filter to unity"""
 
     # Initalise variables
@@ -74,7 +72,7 @@ def calculateGainFactor(numerator, denominator, passband_freq):
 
 
 
-def createIIRNotchFilter(notch_freq, notch_width, passband_f, sample_rate):
+def createIIRNotchFilter(notch_freq:list, notch_width:float, passband_f:float, sample_rate:float) -> tuple:
     """Create and return the coefficents of an IIR notch filter"""
 
     numerator, denominator = computeIIRNotchCoefficients(notch_freq, notch_width, sample_rate)  # Calculate filter coefficents
@@ -85,7 +83,7 @@ def createIIRNotchFilter(notch_freq, notch_width, passband_f, sample_rate):
 
 
 
-def applyIIRNotchFilters(numerator_1, denominator_1, numerator_2, denominator_2, data):
+def applyIIRNotchFilters(numerator_1:list, denominator_1:list, numerator_2:list, denominator_2:list, data:list) -> tuple:
     """Pass data through two cascaded IIR filters and return the result after each filter"""
 
     partially_filtered_data = lfilter(numerator_1, denominator_1, data) # Apply first filter to data
@@ -95,7 +93,7 @@ def applyIIRNotchFilters(numerator_1, denominator_1, numerator_2, denominator_2,
 
 
 
-def combineFilters(numerator_1, denominator_1, numerator_2, denominator_2):
+def combineFilters(numerator_1:list, denominator_1:list, numerator_2:list, denominator_2:list) -> tuple:
     """Tales the numerators and denominators of two filters and convolutes them to create an overall filter.
     The numerator and denominator of this filter are returned"""
 

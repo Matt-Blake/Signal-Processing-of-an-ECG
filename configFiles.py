@@ -1,20 +1,18 @@
 """
-    configFiles.py
-    Contains all tfile formatting and configuration files functions for ENEL420-20S2 Assignment 1.
+    configFiles.py (Signal Processing of an ECG program)
+    Contains all the file formatting and configuration files
+    functions for the Signal Processing of an ECG program.
 
     Authors: Matt Blake   (58979250)
              Reweti Davis (23200856)
-             Group Number: 18
-    Last Modified: 14/08/2020
+    Last Modified: 27/12/2020
 """
 import os
 import shutil
 
-#
-# File functions
-#
 
-def importData(filename):
+# Functions
+def importData(filename:str) -> list:
     """Import data from a text file"""
 
     # Extract data from file
@@ -31,20 +29,20 @@ def importData(filename):
     return data
 
 
-def createClean(filename, directory=False):
-    """Create a file/folder at the target location and returns the path to this if it is a folder or a the file ready
-    for reading and writing if it is a file.
-    Deletes a previously created file if it exists, so that a new file can be written cleanly"""
+def createClean(filename:str, is_directory:bool=False):
+    """Create a file/folder at the target location and returns the path to this if it
+    is a folder or a the file ready for reading and writing if it is a file. Deletes
+    a previously created file if it exists, so that a new file can be written cleanly"""
 
     # Remove old file
     if os.path.exists(filename): # Check if an output path already exists
-        if directory == True: # If a folder is to be created
+        if is_directory == True: # If a folder is to be created
             shutil.rmtree(filename) # Remove previous output folder, so the figures can be cleanly saved
         else: # If a file is to be created
             os.remove(filename) # Remove the previous file, so the file can be cleanly saved
 
     # Create file
-    if directory == True: # If a folder is to be created
+    if is_directory == True: # If a folder is to be created
         output = os.path.join(filename)  # The output folder for the figures to be saved
         os.mkdir(output) # Create output folder
     else: # If a file is to be created
