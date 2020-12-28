@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 from configFiles import *
+from config import *
 
 
 
@@ -34,7 +35,7 @@ def getTimeData(sample_rate:float, num_samples:int) -> list:
     time_array = []
     for i in range(num_samples): # Iterate through each sample
         sample_time = i/sample_rate # Calculate the time this sample is taken
-        time.append(sample_time) # Add time to results array
+        time_array.append(sample_time) # Add time to results array
 
     return time_array
 
@@ -224,7 +225,7 @@ def plotWindowedECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
 
 
 
-def plotWindowFilterResponse(filter:list:, f_samp:float) -> plt.figure:
+def plotWindowFilterResponse(filter:list, f_samp:float) -> plt.figure:
      """Plot and return the frequency response (magnitude and phase) of the window filter"""
 
      # Calculate the frequency response
@@ -278,7 +279,7 @@ def plotOptimalECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
 
 
 
-def plotOptimalFilterResponse(filter:list:, f_samp:float) -> plt.figure:
+def plotOptimalFilterResponse(filter:list, f_samp:float) -> plt.figure:
      """Plot and return the frequency response (magnitude and phase) of the window filter"""
 
      # Calculate the frequency response
@@ -332,7 +333,7 @@ def plotFrequencySampledECGSpectrum(frequency:list, frequency_data:list) -> plt.
 
 
 
-def plotFrequencySampledFilterResponse(filter:list:, f_samp:float) -> plt.figure:
+def plotFrequencySampledFilterResponse(filter:list, f_samp:float) -> plt.figure:
      """Plot and return the frequency response (magnitude and phase) of the Frequency Sampling filter"""
 
      # Calculate the frequency response

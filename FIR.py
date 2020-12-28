@@ -12,6 +12,7 @@
 from scipy.signal import freqz, lfilter, firwin, remez, firwin2, convolve
 from scipy.fft import fft
 import numpy as np
+from config import *
 
 
 # Functions
@@ -19,18 +20,18 @@ def createWindowFilters(notches:list, sample_rate:float, notch_width:float, num_
     """Compute and return the bandstop  window filter array for the specified notches.
     Adjusting the window type and band width changes attenuation."""
 
-    window = ('kaiser', 2.5) # Define the window type
     f1, f2 = notches # Separate the cutoff frequencies specified
     width = notch_width / 2.0 # One sided 3dB bandwidth
+    window_type = (FIR_WINDOW_TYPE, width) # Define the window
 
     cutoff_1 = [(f1 - width), (f1 + width)] # Window 1
     cutoff_2 = [(f2 - width), (f2 + width)] # Window 2
     cutoff = [cutoff_1[0], cutoff_1[1], cutoff_2[0], cutoff_2[1]] # Joined windows
 
 
-    filter_1 = firwin(numtaps=num_taps, cutoff=cutoff_1, window=window, fs=sample_rate) # Filter 1
-    filter_2 = firwin(numtaps=num_taps, cutoff=cutoff_2, window=window, fs=sample_rate) # Filter 2
-    filter_overall =  firwin(numtaps=num_taps, cutoff=cutoff, window=window, fs=sample_rate) # Overall filter
+    filter_1 = firwin(numtaps=num_taps, cutoff=cutoff_1, window=window_type, fs=sample_rate) # Filter 1
+    filter_2 = firwin(numtaps=num_taps, cutoff=cutoff_2, window=window_type, fs=sample_rate) # Filter 2
+    filter_overall =  firwin(numtaps=num_taps, cutoff=cutoff, window=window_type, fs=sample_rate) # Overall filter
     
     return filter_1, filter_2, filter_overall
 
@@ -68,10 +69,10 @@ def createFreqSamplingFilters(notches:list, sample_rate:float, notch_width:float
 
     # Define and computer frequency sampling filter coefficients
     f1, f2 = notches
-    window_type = ('kaiser', 2.5)
     width = notch_width / 2.0 # One sided 3dB bandwidth, in Hz
     alpha = width - 0.01 # Added transition points to narrow the band further
     omega = width - 0.1 
+    window_type = (FIR_WINDOW_TYPE, width) # Define the window
 
     gains = [1, 1, 0, 0, 0, 0, 0, 1, 1] # The passband/stopband gains for each filter
     gains_overall = [1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1] # The passband/stopband gains for the overall filter
