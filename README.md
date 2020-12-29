@@ -1,15 +1,19 @@
-Signal Processing of an ECG
+# Signal Processing of an ECG
 
-Written by Matt Blake (58979250) and Reweti Davis (23200856)
-         
-Group Number 18
- 
-Figures created will be saved in the following folder in the local directory:
-'Group_18_Figures'
+### Description
+The program uses digital filtering to remove narrowband noise from an ECG. This is done with an IIR filter (designed using pole placement) and 3 FIR filters (designed with the window method, optimal method and frequency-sampling) and the results are compared and graphed. This program was originally designed as part of ENEL420 Assignment 1.
 
-Noise power (variance) data will be saved in the following text file in the
-local directory:
-'Group_18_Noise Power_(Variance)_Data_from_Created_Filters.txt'
+### Author
++ Matt Blake
++ Reweti Davis
 
-## License
+### Sponsor
+Nelson Artificial Intelligence Institute [(NAI)](https://www.nai.org.nz/)
+
+### License
 Added an [MIT License](LICENSE)
+
+### Configuration
+The behavior of this program is controlled by changing constants defined in the config.py file.
+
+### Inputs
