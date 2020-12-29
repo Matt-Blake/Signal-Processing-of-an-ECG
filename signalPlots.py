@@ -14,7 +14,7 @@ from scipy.fft import fft
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
-from configFiles import *
+from configFiles import createClean
 from config import *
 
 # Constants
@@ -25,7 +25,7 @@ UNIT_CIRCLE_RADIUS = 1  # The unit circle has a radius of 1 by definition
 RADS_CIRCLE = 2 * np.pi
 
 
-# General functions
+# Functions
 def calcFreqSpectrum(samples:list, sample_rate:float) -> tuple:
     """Compute and return the frequency spectrum of the input samples, for the specified sample rate. Used to plot frequency spectrum."""
 

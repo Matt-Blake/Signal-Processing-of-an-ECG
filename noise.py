@@ -12,7 +12,8 @@
 from scipy.signal import freqz, lfilter, firwin, remez, firwin2, convolve
 from scipy.fft import fft
 import numpy as np
-from configFiles import *
+from configFiles import createClean
+
 
 # Constants
 VARIANCE_TEXT_1 = 'The mean power removed by the '  # The first section of the text string to print
@@ -20,16 +21,6 @@ VARIANCE_TEXT_2 = ' is {:.1f} pW\n' # The section section of the text string to 
 
 
 # Functions
-def saveNoisePowerData(noise_power_data:list, noise_power_output_filename:str):
-    """Iterate through a list of filters, saving the noise power (variance) data"""
-
-    outputfile = createClean(noise_power_output_filename)  # Create output file
-    for filter_name, filter_noise_power in noise_power_data.items(): # Iterate through filters
-        output_string = VARIANCE_TEXT_1 + filter_name + VARIANCE_TEXT_2.format(filter_noise_power) # The text to save
-        outputfile.write(output_string) # Save the noise power (variance) data for that filter
-
-
-
 def calculateVariance(data:list):
     """Calculates and returns the variance of a signal"""
 
@@ -52,7 +43,27 @@ def calculateNoiseVariance(data:list, filtered_data:list):
 
     # Calculate the variance of the removed noise by finding the variances of the filtered and unfiltered data
     data_variance = calculateVariance(np_data) # Calculate the variance of the unfiltered data
-    filtered_data_variance = calculateVariance(np_filtered_data) # Calculat the variance of the filtered data
+    filtered_data_variance = calculateVariance(np_filtered_data) # Calculate the variance of the filtered data
     noise_data_variance = data_variance - filtered_data_variance # Calculate the variance of the removed noise
 
     return noise_data_variance
+
+
+def calculateNoiseVariancePerFilter(samples:list, half_filtered_samples:list, both_filtered_samples:list, overall_filtered_samples:list) -> tuple:
+    """Calculate the noise removed by a filter and by each notch in the filter. This function is used
+    to ready results for output."""
+
+    overall_noise_variance = calculateNoiseVariance(samples, overall_filtered_samples) # Calculate the variance of the noise removed by the overall filter
+    first_noise_variance = calculateNoiseVariance(samples, half_filtered_samples) # Calculate the variance of the noise removed by the first notch
+    second_noise_variance = calculateNoiseVariance(half_filtered_samples, both_filtered_samples) # Calculate the variance of the noise removed by the second notch
+
+    return overall_noise_variance, first_noise_variance, second_noise_variance
+
+
+def saveNoisePowerData(noise_power_data:list, noise_power_output_filename:str):
+    """Iterate through a list of filters, saving the noise power (variance) data"""
+
+    outputfile = createClean(noise_power_output_filename)  # Create output file
+    for filter_name, filter_noise_power in noise_power_data.items(): # Iterate through filters
+        output_string = VARIANCE_TEXT_1 + filter_name + VARIANCE_TEXT_2.format(filter_noise_power) # The text to save
+        outputfile.write(output_string) # Save the noise power (variance) data for that filter
