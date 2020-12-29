@@ -17,6 +17,12 @@ import numpy as np
 from configFiles import *
 from config import *
 
+# Constants
+TO_DB = 20 # Factor needed to convert a log to dB
+START_FREQ = 0 # First frequency to plot (Hz) 
+UNIT_CIRCLE_CENTRE = (0, 0)  # The x and y coordinates for the unit circle to be centre at
+UNIT_CIRCLE_RADIUS = 1  # The unit circle has a radius of 1 by definition
+RADS_CIRCLE = 2 * np.pi
 
 
 # General functions
@@ -24,7 +30,7 @@ def calcFreqSpectrum(samples:list, sample_rate:float) -> tuple:
     """Compute and return the frequency spectrum of the input samples, for the specified sample rate. Used to plot frequency spectrum."""
 
     freq_data = np.abs(fft(samples)) # Apply FFT to data
-    freq = np.linspace(0, sample_rate, len(freq_data)) # Create an array of frequencies to be plotted
+    freq = np.linspace(START_FREQ, sample_rate, len(freq_data)) # Create an array of frequencies to be plotted
     return freq, freq_data
 
 
@@ -70,7 +76,7 @@ def plotECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
     """Calculate and plot the frequency spectrum of the ECG"""
 
     ECGSpectrum = plt.figure()
-    plt.plot(frequency, 20 * np.log10(abs(frequency_data)), linewidth=SPECTRUM_LINE_WIDTH)
+    plt.plot(frequency, np.log10(abs(frequency_data) * TO_DB), linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the ECG signal")
@@ -84,25 +90,21 @@ def plotECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
 def plotIIRPoleZero(cutoffs:list, notch_width:float, f_samp:float) -> plt.figure:
     """Plot a pole-zero diagram of an IIR notch filter"""
 
-    # Define unit circle parameters
-    circle_centre = (0, 0)  # The x and y coordinates for the unit circle to be centre at
-    circle_radius = 1  # The unit circle has a radius of 1 by definition
-
     # Create figure
-    circle_fig, axis = plt.subplots(figsize=(6, 6))  # Create plot
-    plt.xlim([circle_centre[0] - 1, circle_centre[0] + 1])
-    plt.ylim([circle_centre[1] - 1, circle_centre[1] + 1])
+    circle_fig, axis = plt.subplots(figsize=POLE_ZERO_FIG_SIZE)  # Create plot
+    plt.xlim([UNIT_CIRCLE_CENTRE[0] - UNIT_CIRCLE_RADIUS, UNIT_CIRCLE_CENTRE[0] + UNIT_CIRCLE_RADIUS])
+    plt.ylim([UNIT_CIRCLE_CENTRE[1] - UNIT_CIRCLE_RADIUS, UNIT_CIRCLE_CENTRE[1] + UNIT_CIRCLE_RADIUS])
 
     # Define pole/zero magnitudes
-    zeros_magnitude = 1  # Place the zeros on the unit circle for maximum attenuation
-    poles_magnitude = 1 - np.pi * (notch_width/f_samp)  # Calculate the optimal magnitude for the pole pairs
+    zeros_magnitude = UNIT_CIRCLE_RADIUS  # Place the zeros on the unit circle for maximum attenuation
+    poles_magnitude = UNIT_CIRCLE_RADIUS - np.pi * (notch_width/f_samp)  # Calculate the optimal magnitude for the pole pairs
 
     # Create real and imaginary axis on graph
-    real_axis = plt.Line2D([circle_centre[0] - 2, circle_centre[0] + 2], [0, 0], color='black')
-    imag_axis = plt.Line2D([0, 0], [[circle_centre[1] - 2, circle_centre[1] + 2]], color='black')
+    real_axis = plt.Line2D([UNIT_CIRCLE_CENTRE[0] - UNIT_CIRCLE_RADIUS, UNIT_CIRCLE_CENTRE[0] + UNIT_CIRCLE_RADIUS], UNIT_CIRCLE_CENTRE, color='black')
+    imag_axis = plt.Line2D(UNIT_CIRCLE_CENTRE, [[UNIT_CIRCLE_CENTRE[1] - UNIT_CIRCLE_RADIUS, UNIT_CIRCLE_CENTRE[1] + UNIT_CIRCLE_RADIUS]], color='black')
 
     # Plot unit circle
-    circle = plt.Circle(circle_centre, circle_radius, color ='black', fill=False, label='Unit circle') # Create circle
+    circle = plt.Circle(UNIT_CIRCLE_CENTRE, UNIT_CIRCLE_RADIUS, color ='black', fill=False, label='Unit circle') # Create circle
     axis = circle_fig.gca() # Create plot axis
     axis.add_artist(circle) # Add unit circle to figure
     axis.add_artist(real_axis)
@@ -112,23 +114,25 @@ def plotIIRPoleZero(cutoffs:list, notch_width:float, f_samp:float) -> plt.figure
     for cutoff in cutoffs: # Iterate through each cutoff frequency
 
         # Calculate position of poles/zeros
-        angle = 2 * np.pi * cutoff/f_samp # Calculate the pole/zero angle for cutoff frequency
+        angle = RADS_CIRCLE * cutoff/f_samp # Calculate the pole/zero angle for cutoff frequency
         zero_x_postion = zeros_magnitude * np.cos(angle) # Calculate zero position in real (x) axis
         zero_y_postion = zeros_magnitude * np.sin(angle) # Calculate zero position in imaginary (y) axis
         pole_x_postion = poles_magnitude * np.cos(angle) # Calculate pole position in real (x) axis
         pole_y_postion = poles_magnitude * np.sin(angle) # Calculate pole position in imaginary (y) axis
 
-        # Plot lines between the origin and poles/zeros
-        zero_line = plt.Line2D([circle_centre[0], zero_x_postion], [circle_centre[1], zero_y_postion], color='grey', linestyle='--')
-        conjugate_zero_line = plt.Line2D([circle_centre[0], zero_x_postion], [circle_centre[1], -zero_y_postion], color='grey', linestyle='--')
-        axis.add_artist(zero_line)
-        axis.add_artist(conjugate_zero_line)
-
         # Plot conjugate pairs of poles and zeros
-        axis.plot([pole_x_postion], [pole_y_postion], marker='x', markersize=8, markeredgewidth=2, color='red', label='pole')
-        axis.plot([pole_x_postion], [-pole_y_postion], marker='x', markersize=8, markeredgewidth=2, color='red', label='pole')
+        axis.plot([pole_x_postion], [pole_y_postion], marker='x', markersize=POLE_ZERO_MARKER_SIZE,
+                markeredgewidth=POLE_ZERO_MARKER_WIDTH, color='red', label='pole')
+        axis.plot([pole_x_postion], [-pole_y_postion], marker='x', markersize=POLE_ZERO_MARKER_SIZE,
+                markeredgewidth=POLE_ZERO_MARKER_WIDTH, color='red', label='pole')
         axis.plot([zero_x_postion], [zero_y_postion], marker='o', color='blue', label='zero')
         axis.plot([zero_x_postion], [-zero_y_postion], marker='o', color='blue', label='zero')
+
+        # Plot lines between the origin and poles/zeros
+        zero_line = plt.Line2D([UNIT_CIRCLE_CENTRE[0], zero_x_postion], [UNIT_CIRCLE_CENTRE[1], zero_y_postion], color='grey', linestyle='--')
+        conjugate_zero_line = plt.Line2D([UNIT_CIRCLE_CENTRE[0], zero_x_postion], [UNIT_CIRCLE_CENTRE[1], -zero_y_postion], color='grey', linestyle='--')
+        axis.add_artist(zero_line)
+        axis.add_artist(conjugate_zero_line)
 
     # Label figure
     plt.xlabel('Real{Z}')
@@ -161,7 +165,7 @@ def plotIIRNotchECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
     """Calculate and plot the frequency spectrum of the ECG after filtering with an IIR notch filter"""
 
     IIRNotchECGSpectrum = plt.figure()
-    plt.plot(frequency, 20 * np.log(abs(frequency_data)), linewidth=SPECTRUM_LINE_WIDTH)
+    plt.plot(frequency, np.log(abs(frequency_data) * TO_DB), linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the IIR Notch Filtered ECG signal")
@@ -183,7 +187,7 @@ def plotIIRNotchFilterResponse(numerator:list, denominator:list, f_samp:float) -
     plt.xlabel("Frequency (Hz)")
 
     # Plot magnitude response
-    IIR_ax1.plot(freq, 20 * np.log(abs(response))) # Plot magnitude in dB vs Hz
+    IIR_ax1.plot(freq, np.log(abs(response)) * TO_DB) # Plot magnitude in dB vs Hz
     IIR_ax1.set_ylabel("Amplitude (dB)")
     IIR_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
@@ -215,7 +219,7 @@ def plotWindowedECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
     """Calculate and plot the window filtered ECG frequency spectrum"""
 
     WindowedECGSpectrum = plt.figure()
-    plt.plot(frequency, 20 * np.log10(abs(frequency_data)), linewidth=SPECTRUM_LINE_WIDTH)
+    plt.plot(frequency, np.log10(abs(frequency_data)) * TO_DB, linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the Window Filtered ECG Signal")
@@ -237,7 +241,7 @@ def plotWindowFilterResponse(filter:list, f_samp:float) -> plt.figure:
      plt.xlabel("Frequency (Hz)")
 
      # Plot magnitude response
-     window_ax1.plot(freq, 20 * np.log10(abs(response)), linewidth=FILTER_LINE_WIDTH)  # Plot magnitude in dB vs Hz
+     window_ax1.plot(freq, np.log10(abs(response)) * TO_DB, linewidth=FILTER_LINE_WIDTH)  # Plot magnitude in dB vs Hz
      window_ax1.set_ylabel("Amplitude (dB)")
      window_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
@@ -269,7 +273,7 @@ def plotOptimalECGSpectrum(frequency:list, frequency_data:list) -> plt.figure:
     """Calculate and plot the window filtered ECG frequency spectrum"""
 
     OptimalECGSpectrum = plt.figure()
-    plt.plot(frequency, 20 * np.log10(abs(frequency_data)), linewidth=SPECTRUM_LINE_WIDTH)
+    plt.plot(frequency, np.log10(abs(frequency_data)) * TO_DB, linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the Optimal Filtered ECG Signal")
@@ -291,7 +295,7 @@ def plotOptimalFilterResponse(filter:list, f_samp:float) -> plt.figure:
      plt.xlabel("Frequency (Hz)")
 
      # Plot magnitude response
-     optimal_ax1.plot(freq, 20 * np.log10(abs(response)), linewidth=FILTER_LINE_WIDTH)  # Plot magnitude in dB vs Hz
+     optimal_ax1.plot(freq, np.log10(abs(response)) * TO_DB, linewidth=FILTER_LINE_WIDTH)  # Plot magnitude in dB vs Hz
      optimal_ax1.set_ylabel("Amplitude (dB)")
      optimal_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 
@@ -323,7 +327,7 @@ def plotFrequencySampledECGSpectrum(frequency:list, frequency_data:list) -> plt.
     """Calculate and plot the Frequency Sampling filtered ECG frequency spectrum"""
 
     FreqECGSpectrum = plt.figure()
-    plt.plot(frequency, 20 * np.log10(abs(frequency_data)), linewidth=SPECTRUM_LINE_WIDTH)
+    plt.plot(frequency, np.log10(abs(frequency_data)) * TO_DB, linewidth=SPECTRUM_LINE_WIDTH)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Amplitude (dB)")
     plt.suptitle("Frequency Spectrum of the Frequency Sampling Filtered ECG Signal")
@@ -345,7 +349,7 @@ def plotFrequencySampledFilterResponse(filter:list, f_samp:float) -> plt.figure:
      plt.xlabel("Frequency (Hz)")
 
      # Plot magnitude response
-     freq_ax1.plot(freq, 20 * np.log10(abs(response)), linewidth=FILTER_LINE_WIDTH)  # Plot magnitude in dB vs Hz
+     freq_ax1.plot(freq, np.log10(abs(response)) * TO_DB, linewidth=FILTER_LINE_WIDTH)  # Plot magnitude in dB vs Hz
      freq_ax1.set_ylabel("Amplitude (dB)")
      freq_ax1.set_xlim(freq[0], freq[-1])  # Limit the x axis from 0 to Nyquist frequency
 

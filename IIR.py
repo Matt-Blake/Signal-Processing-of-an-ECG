@@ -13,29 +13,30 @@ from scipy.signal import freqz, lfilter, firwin, remez, firwin2, convolve
 from scipy.fft import fft
 import numpy as np
 
+# Constants
+UNIT_CIRCLE_RADIUS = 1 # The unit circle has a radius of 1 by definition
+RADS_CIRCLE = 2 * np.pi # The number of radians in a circle
 
 # Functions
 def computeIIRNotchCoefficients(notch_freq:list, notch_width:float, sampling_freq:float) -> tuple:
     """Compute and return the optimal notch filter coefficients, based on the notch frequency, the 3 dB width of the
     notch and the sampling frequency"""
 
-    rads_circle = 2 * np.pi # Define the number of radians in a circle (for unit circle analysis)
-
     # Calculate the locations of the zero conjugate pair
-    zeros_magnitude = 1 # Place the zeros on the unit circle for maximum attenuation
-    zeros_phase = notch_freq/sampling_freq * rads_circle # Calculate the optimal phase for the zero pairs\
+    zeros_magnitude = UNIT_CIRCLE_RADIUS # Place the zeros on the unit circle for maximum attenuation
+    zeros_phase = notch_freq/sampling_freq * RADS_CIRCLE # Calculate the optimal phase for the zero pairs\
 
     # Calculate the locations of the pole conjugate pair
-    poles_magnitude = 1 - np.pi * (notch_width/sampling_freq)  # Calculate the optimal magnitude for the pole pairs
-    poles_phase = notch_freq/sampling_freq * rads_circle  # Calculate the optimal phase for the pole pairs
+    poles_magnitude = UNIT_CIRCLE_RADIUS - np.pi * (notch_width/sampling_freq)  # Calculate the optimal magnitude for the pole pairs
+    poles_phase = notch_freq/sampling_freq * RADS_CIRCLE  # Calculate the optimal phase for the pole pairs
 
-    # Calculate feedfoward tap coefficients
+    # Calculate quadratic feedfoward tap coefficients
     a0 = 1 * 1 # Calculate the zero delay term zero coefficent
     a1 = -(1 * zeros_magnitude * np.exp(1j * zeros_phase) + 1 * zeros_magnitude * np.exp(-1j * zeros_phase)) # Calculate the one delay term zero coefficent
     a2 = zeros_magnitude * np.exp(1j * zeros_phase) * zeros_magnitude * np.exp(-1j * zeros_phase) # Calculate the two delay term zero coefficent
     numerator = [np.real(a0), np.real(a1), np.real(a2)] # Store feedfoward coefficents in an array
 
-    # Calculate feedback tap coefficients
+    # Calculate quadratic feedback tap coefficients
     b0 = 1 * 1  # Calculate the zero delay term zero coefficent
     b1 = -(1 * poles_magnitude * np.exp(1j * poles_phase) + 1 * poles_magnitude * np.exp(-1j * poles_phase))  # Calculate the one delay term zero coefficent
     b2 = poles_magnitude * np.exp(1j * poles_phase) * poles_magnitude * np.exp(-1j * poles_phase)  # Calculate the two delay term zero coefficent

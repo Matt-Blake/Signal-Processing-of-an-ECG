@@ -15,7 +15,6 @@
 
 
 """Todo
-    # Extract magic numbers
     # Make main smaller (extract repeated variance cals to function)
     # suss the importing libraries better (no need to import * everything)
     # Add -> to configFiles final function

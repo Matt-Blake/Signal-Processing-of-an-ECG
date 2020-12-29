@@ -14,19 +14,18 @@ from scipy.fft import fft
 import numpy as np
 from configFiles import *
 
+# Constants
+VARIANCE_TEXT_1 = 'The mean power removed by the '  # The first section of the text string to print
+VARIANCE_TEXT_2 = ' is {:.1f} pW\n' # The section section of the text string to print
+
 
 # Functions
 def saveNoisePowerData(noise_power_data:list, noise_power_output_filename:str):
     """Iterate through a list of filters, saving the noise power (variance) data"""
 
-    # Create text to write and file to write to
-    variance_text_1 = 'The mean power removed by the '  # The first section of the text string to print
-    variance_text_2 = ' is {:.1f} pW\n' # The section section of the text string to print
     outputfile = createClean(noise_power_output_filename)  # Create output file
-
-    # Write data to file
     for filter_name, filter_noise_power in noise_power_data.items(): # Iterate through filters
-        output_string = variance_text_1 + filter_name + variance_text_2.format(filter_noise_power) # The text to save
+        output_string = VARIANCE_TEXT_1 + filter_name + VARIANCE_TEXT_2.format(filter_noise_power) # The text to save
         outputfile.write(output_string) # Save the noise power (variance) data for that filter
 
 
