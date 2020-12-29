@@ -15,12 +15,12 @@ SAMPLE_RATE = 1024  # Sample rate of data (Hz)
 
 # Define output file parameters
 FIGURES_FOLDER_NAME = 'Group_18_Figures' # Folder to save created figure images to
-NOISE_POWER_OUTPUT_FILENAME = 'Group_18_Noise_Power_(Variance)_Data_from_Created_Filters.txt' # File to save calculated noise power data
 FIGURE_NAMES = ['ECG_Time_Plot.png', 'ECG_Freq_Plot.png', 'IIR_Pole_Zero_Plot.png', 'IIR_Notched_ECG_Time_Plot.png',
                 'IIR_Notched_Freq_Plot.png', 'IIR_Frequency_Response.png', 'Windowed_ECG_Time_Plot.png',
                 'Windowed_Freq_Plot.png', 'Windowed_Frequency_Response.png', 'Optimal_ECG_Time_Plot.png',
                 'Optimal_Freq_Plot.png', 'Optimal_Frequency_Response.png', 'Freq_Sampled_ECG_Time_Plot.png',
                 'Freq_Sampled_Freq_Plot.png', 'Freq_Sampled_Frequency_Response.png'] # The names (in order) that each figure should be saved as
+NOISE_POWER_OUTPUT_FILENAME = 'Group_18_Noise_Power_(Variance)_Data_from_Created_Filters.txt' # File to save calculated noise power data
 FILTER_NAMES = ['IIR notch filters', 'first IIR notch filter', 'second IIR notch filter', 'FIR Window filters',
                 'first window filter', 'second window filter', 'FIR Optimal filters', 'first optimal filter',
                 'second optimal filter', 'FIR Frequency Sampling filters', 'first frequency sampling filter',
