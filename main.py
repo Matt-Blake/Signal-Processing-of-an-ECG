@@ -119,18 +119,18 @@ def main():
     second_freq_sampling_noise_variance = calculateNoiseVariance(half_freq_samples, full_freq_samples)  # Calculate the variance of the noise removed by the
 
     # Save noise power to a .txt file
-    noise_power_data = {'IIR notch filters': notched_noise_variance,
-                        'first IIR notch filter': first_notched_noise_variance,
-                        'second IIR notch filter': second_notched_noise_variance,
-                        'FIR Window filters': window_noise_variance,
-                        'first window filter': first_window_noise_variance,
-                        'second window filter': second_window_noise_variance,
-                        'FIR Optimal filters': optimal_noise_variance,
-                        'first optimal filter': first_optimal_noise_variance,
-                        'second optimal filter': second_optimal_noise_variance,
-                        'FIR Frequency Sampling filters': freq_sampling_noise_variance,
-                        'first frequency sampling filter': first_freq_sampling_noise_variance,
-                        'second frequency sampling filter': second_freq_sampling_noise_variance
+    noise_power_data = {FILTER_NAMES[0]: notched_noise_variance,
+                        FILTER_NAMES[1]: first_notched_noise_variance,
+                        FILTER_NAMES[2]: second_notched_noise_variance,
+                        FILTER_NAMES[3]: window_noise_variance,
+                        FILTER_NAMES[4]: first_window_noise_variance,
+                        FILTER_NAMES[5]: second_window_noise_variance,
+                        FILTER_NAMES[6]: optimal_noise_variance,
+                        FILTER_NAMES[7]: first_optimal_noise_variance,
+                        FILTER_NAMES[8]: second_optimal_noise_variance,
+                        FILTER_NAMES[9]: freq_sampling_noise_variance,
+                        FILTER_NAMES[10]: first_freq_sampling_noise_variance,
+                        FILTER_NAMES[11]: second_freq_sampling_noise_variance
                         }  # Create a dictionary of the filter name and its noise power
     saveNoisePowerData(noise_power_data, NOISE_POWER_OUTPUT_FILENAME)  # Save the data about each filter to a file
 

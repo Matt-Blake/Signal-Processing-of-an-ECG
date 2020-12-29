@@ -20,7 +20,11 @@ FIGURE_NAMES = ['ECG_Time_Plot.png', 'ECG_Freq_Plot.png', 'IIR_Pole_Zero_Plot.pn
                 'IIR_Notched_Freq_Plot.png', 'IIR_Frequency_Response.png', 'Windowed_ECG_Time_Plot.png',
                 'Windowed_Freq_Plot.png', 'Windowed_Frequency_Response.png', 'Optimal_ECG_Time_Plot.png',
                 'Optimal_Freq_Plot.png', 'Optimal_Frequency_Response.png', 'Freq_Sampled_ECG_Time_Plot.png',
-                'Freq_Sampled_Freq_Plot.png', 'Freq_Sampled_Frequency_Response.png']  # The names that each figure should be saved as
+                'Freq_Sampled_Freq_Plot.png', 'Freq_Sampled_Frequency_Response.png'] # The names (in order) that each figure should be saved as
+FILTER_NAMES = ['IIR notch filters', 'first IIR notch filter', 'second IIR notch filter', 'FIR Window filters',
+                'first window filter', 'second window filter', 'FIR Optimal filters', 'first optimal filter',
+                'second optimal filter', 'FIR Frequency Sampling filters', 'first frequency sampling filter',
+                'second frequency sampling filter'] # The filter names (in order), so that variance/noise data can be saved
 
 # Define general filter parameters
 CUTOFF_FREQS = [57.755, 88.824] # Frequencies to attenuate (Hz), which were calculated based on previous graphical analysis
