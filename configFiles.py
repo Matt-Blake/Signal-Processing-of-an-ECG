@@ -5,7 +5,7 @@
 
     Authors: Matt Blake   (58979250)
              Reweti Davis (23200856)
-    Last Modified: 27/12/2020
+    Last Modified: 03/01/2021
 """
 import os
 import shutil
@@ -16,7 +16,7 @@ def importData(filename:str) -> list:
     """Import data from a text file"""
 
     # Extract data from file
-    data_file = open(filename, 'r') # Create the file object where data is stored
+    data_file = open(filename, 'r') # Open datafile for reading
     data_string = data_file.read() # Read the data from the file object
     data_list = data_string.split() # Create a list of each sample from the singular data string
 
