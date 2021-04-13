@@ -20,7 +20,7 @@ from config import *
 # Constants
 TO_DB = 20 # Factor needed to convert a log to dB
 START_FREQ = 0 # First frequency to plot (Hz) 
-UNIT_CIRCLE_CENTRE = (0, 0)  # The x and y coordinates for the unit circle to be centre at
+UNIT_CIRCLE_CENTRE = (0, 0)  # The x and y coordinates for the unit circle to be centred at
 UNIT_CIRCLE_RADIUS = 1  # The unit circle has a radius of 1 by definition
 RADS_CIRCLE = 2 * np.pi
 
